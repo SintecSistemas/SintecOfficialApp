@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  PAINEL DE DETALHE DO PEDIDO — Kalipso Studio (SysDev)                      ║
+║  Layout: 4 colunas horizontais dentro de linha expansível do Looper          ║
+║  Versão: 3.0  |  Comunicação: location.hash (padrão oficial Kalipso)        ║
+║  Nomenclatura: fn_PedidoDelivery[Ação][Contexto]                             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, user-scalable=no"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:        #0d2d5e;
+  --blue-mid:    #2563eb;
+  --blue-light:  #eff6ff;
+  --blue-border: #bfdbfe;
+  --teal:        #0f6e56;
+  --gray-50:     #f8fafc;
+  --gray-100:    #f1f5f9;
+  --gray-200:    #e2e8f0;
+  --gray-400:    #94a3b8;
+  --gray-600:    #475569;
+  --gray-800:    #1e293b;
+  --white:       #ffffff;
+  --font: 'Segoe UI', system-ui, sans-serif;
+}
+
+html, body {
+  background: #fff;
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--gray-800);
+  margin: 0;
+  padding: 0;
+}
+
+.painel {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0;
+  background: var(--gray-50);
+  border-top: 2px solid var(--blue-border);
+  border-bottom: 1px solid var(--gray-200);
+  width: 100%;
+}
+
+.col {
+  padding: 12px 16px;
+  border-right: 1px solid var(--gray-200);
+  min-width: 0;
+}
+.col:last-child { border-right: none; }
+
+.col-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* COLUNA 1 — ITENS */
+.itens-table { width: 100%; border-collapse: collapse; }
+.itens-table tr { border-bottom: 1px solid var(--gray-100); }
+.itens-table tr:last-child { border-bottom: none; }
+.itens-table td { padding: 4px 0; font-size: 12px; color: var(--gray-800); vertical-align: top; }
+.itens-table td.qty  { width: 30px; color: var(--gray-400); font-weight: 600; white-space: nowrap; }
+.itens-table td.nome { flex: 1; }
+.itens-table td.val  { text-align: right; white-space: nowrap; font-weight: 600; color: var(--gray-600); padding-left: 8px; }
+.itens-table tbody tr { cursor: pointer; transition: background .1s; }
+.itens-table tbody tr:hover td { background: var(--blue-light); }
+
+.itens-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0 0;
+  margin-top: 5px;
+  border-top: 1px solid var(--gray-200);
+  font-size: 12px;
+}
+.itens-footer .label    { color: var(--gray-400); font-weight: 600; }
+.itens-footer .qtd      { font-weight: 800; color: var(--navy); font-size: 13px; }
+.itens-footer .total-val{ font-weight: 800; color: var(--navy); font-size: 13px; }
+
+/* COLUNA 2 — ENDEREÇO */
+.end-row {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 6px;
+  margin: 0 -6px 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .1s;
+}
+.end-row:hover { background: var(--blue-light); }
+.end-row .lbl { font-size: 10px; color: var(--gray-400); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; line-height: 1.2; }
+.end-row .val { font-size: 12px; color: var(--gray-800); line-height: 1.4; margin-top: 1px; }
+.cep-badge {
+  display: inline-block;
+  background: var(--blue-light);
+  color: var(--blue-mid);
+  border: 1px solid var(--blue-border);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+/* COLUNA 3 — INFO ADICIONAL */
+.info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 5px 6px;
+  margin: 0 -6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .1s;
+  border-bottom: 1px solid var(--gray-100);
+}
+.info-row:last-child { border-bottom: none; }
+.info-row:hover { background: var(--blue-light); }
+.info-row .lbl { font-size: 11px; color: var(--gray-400); font-weight: 600; white-space: nowrap; min-width: 110px; }
+.info-row .val { font-size: 12px; color: var(--gray-800); font-weight: 500; }
+.info-row .val.pix      { color: var(--teal); font-weight: 700; }
+.info-row .val.destaque { color: var(--blue-mid); font-weight: 600; }
+
+/* COLUNA 4 — HISTÓRICO */
+.hist-list { list-style: none; }
+.hist-item {
+  display: flex;
+  gap: 8px;
+  padding: 5px 6px;
+  margin: 0 -6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .1s;
+  border-bottom: 1px solid var(--gray-100);
+  align-items: flex-start;
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-item:hover { background: var(--blue-light); }
+.hist-dot-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+.hist-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-400); flex-shrink: 0; }
+.hist-dot.ativo { background: var(--navy); }
+.hist-dot.atual { background: var(--blue-mid); box-shadow: 0 0 0 3px var(--blue-light); }
+.hist-line { width: 1px; flex: 1; min-height: 12px; background: var(--gray-200); margin-top: 3px; }
+.hist-content { flex: 1; min-width: 0; }
+.hist-hora { font-size: 11px; color: var(--gray-400); font-weight: 700; white-space: nowrap; }
+.hist-desc { font-size: 12px; color: var(--gray-800); font-weight: 500; margin-top: 1px; }
+.hist-prev { font-size: 11px; color: var(--blue-mid); margin-top: 2px; text-decoration: underline; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  VARIÁVEIS — substitua cada {{VARIAVEL}} antes de injetar no HTMLView        ║
+║  Comunicação HTML → Kalipso: location.hash = 'fn_Nome|valor'                 ║
+║  Kalipso captura via evento: HTMLView_Detalhe.OnHashChange → fn_PedidoDeliveryRoteadorHash ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+
+<div class="painel" id="painelDetalhe">
+
+  <!-- ══════════════════════════════════
+       COLUNA 1 — ITENS DO PEDIDO
+       Clique → fn_PedidoDeliveryEditarItem
+  ══════════════════════════════════ -->
+  <div class="col" id="col-itens">
+    <div class="col-title">📦 Itens do Pedido ({{TOTAL_ITENS}})</div>
+    <table class="itens-table">
+      <tbody id="tbodyItens">
+        <!--
+          BLOCO REPETIDO POR ITEM — gerado por fn_PedidoDeliveryMontarItensHTML()
+          Modelo de uma linha (substituir variáveis no Pascal):
+
+          <tr tabindex="0"
+              onclick="kal('fn_PedidoDeliveryEditarItem|{{ID_ITEM}}|{{NOME_PRODUTO}}|{{QTD}}|{{VALOR_ITEM}}')"
+              onkeydown="kalKey(event,'fn_PedidoDeliveryEditarItem|{{ID_ITEM}}|{{NOME_PRODUTO}}|{{QTD}}|{{VALOR_ITEM}}')">
+            <td class="qty">{{QTD}}x</td>
+            <td class="nome">{{NOME_PRODUTO}}</td>
+            <td class="val">{{VALOR_ITEM}}</td>
+          </tr>
+        -->
+        {{ITENS_HTML}}
+      </tbody>
+    </table>
+    <div class="itens-footer">
+      <span class="label">Total de Itens</span>
+      <span class="qtd">{{TOTAL_ITENS}}</span>
+      <span class="total-val">{{VALOR_TOTAL}}</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       COLUNA 2 — ENDEREÇO DE ENTREGA
+       Clique → fn_PedidoDeliveryEditarEndereco
+                fn_PedidoDeliveryBuscarCEP
+                fn_PedidoDeliveryEditarReferencia
+  ══════════════════════════════════ -->
+  <div class="col" id="col-endereco">
+    <div class="col-title">📍 Endereço de Entrega</div>
+
+    <!-- Logradouro + Número — passa os dois concatenados como valor -->
+    <div class="end-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryEditarEndereco|{{END_LOGRADOURO}}, {{END_NUMERO}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryEditarEndereco|{{END_LOGRADOURO}}, {{END_NUMERO}}')">
+      <span class="val">{{END_LOGRADOURO}}, {{END_NUMERO}}</span>
+    </div>
+
+    <!-- Complemento — passa o complemento como valor -->
+    <div class="end-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryEditarEndereco|{{END_COMPLEMENTO}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryEditarEndereco|{{END_COMPLEMENTO}}')">
+      <span class="val">{{END_COMPLEMENTO}}</span>
+    </div>
+
+    <!-- Bairro / Cidade / UF — passa cidade completa como valor -->
+    <div class="end-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryEditarEndereco|{{END_BAIRRO}} - {{END_CIDADE}} / {{END_UF}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryEditarEndereco|{{END_BAIRRO}} - {{END_CIDADE}} / {{END_UF}}')">
+      <span class="val">{{END_BAIRRO}} - {{END_CIDADE}} / {{END_UF}}</span>
+    </div>
+
+    <!-- CEP — passa o CEP puro como valor para consulta -->
+    <div class="end-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryBuscarCEP|{{END_CEP}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryBuscarCEP|{{END_CEP}}')">
+      <span class="lbl">CEP</span>
+      <span class="cep-badge">{{END_CEP}}</span>
+    </div>
+
+    <!-- Referência — passa o texto da referência como valor -->
+    <div class="end-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryEditarReferencia|{{END_REFERENCIA}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryEditarReferencia|{{END_REFERENCIA}}')">
+      <span class="lbl">Referência</span>
+      <span class="val">{{END_REFERENCIA}}</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       COLUNA 3 — INFORMAÇÕES ADICIONAIS
+       Clique → fn_PedidoDeliveryAlterarPagamento
+                fn_PedidoDeliveryAlterarTipoEntrega
+                fn_PedidoDeliveryAlterarTempoEstimado
+                fn_PedidoDeliveryEditarObservacao
+  ══════════════════════════════════ -->
+  <div class="col" id="col-info">
+    <div class="col-title">ℹ️ Informações Adicionais</div>
+
+    <!-- Forma de Pagamento — passa o valor atual (ex: PIX) -->
+    <div class="info-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryAlterarPagamento|{{FORMA_PAGAMENTO}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryAlterarPagamento|{{FORMA_PAGAMENTO}}')">
+      <span class="lbl">Forma de Pagamento:</span>
+      <span class="val pix">{{FORMA_PAGAMENTO}}</span>
+    </div>
+
+    <!-- Tipo de Entrega — passa o tipo atual (ex: Normal) -->
+    <div class="info-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryAlterarTipoEntrega|{{TIPO_ENTREGA}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryAlterarTipoEntrega|{{TIPO_ENTREGA}}')">
+      <span class="lbl">Tipo de Entrega:</span>
+      <span class="val destaque">{{TIPO_ENTREGA}}</span>
+    </div>
+
+    <!-- Tempo Estimado — passa os minutos atuais (ex: 25) -->
+    <div class="info-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryAlterarTempoEstimado|{{TEMPO_ESTIMADO}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryAlterarTempoEstimado|{{TEMPO_ESTIMADO}}')">
+      <span class="lbl">Tempo Estimado:</span>
+      <span class="val">{{TEMPO_ESTIMADO}} min</span>
+    </div>
+
+    <!-- Observação — passa o texto atual da observação -->
+    <div class="info-row" tabindex="0"
+         onclick="kal('fn_PedidoDeliveryEditarObservacao|{{OBSERVACAO}}')"
+         onkeydown="kalKey(event,'fn_PedidoDeliveryEditarObservacao|{{OBSERVACAO}}')">
+      <span class="lbl">Observação:</span>
+      <span class="val">{{OBSERVACAO}}</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       COLUNA 4 — HISTÓRICO
+       Clique → fn_PedidoDeliveryVerDetalheHistorico
+                fn_PedidoDeliveryVerPrevisaoEntrega
+  ══════════════════════════════════ -->
+  <div class="col" id="col-historico">
+    <div class="col-title">🕐 Histórico</div>
+    <ul class="hist-list" id="listaHistorico">
+      <!--
+        BLOCO REPETIDO POR EVENTO — gerado por fn_PedidoDeliveryMontarHistoricoHTML()
+
+        SEM previsão:
+        <li class="hist-item" tabindex="0"
+            onclick="kal('fn_PedidoDeliveryVerDetalheHistorico|{{ID_HIST}}|{{HORA}}|{{DESC_HIST}}')"
+            onkeydown="kalKey(event,'fn_PedidoDeliveryVerDetalheHistorico|{{ID_HIST}}|{{HORA}}|{{DESC_HIST}}')">
+          <div class="hist-dot-wrap">
+            <div class="hist-dot {{CLASSE_DOT}}"></div>
+            <div class="hist-line"></div>
+          </div>
+          <div class="hist-content">
+            <div class="hist-hora">{{HORA}}</div>
+            <div class="hist-desc">{{DESC_HIST}}</div>
+          </div>
+        </li>
+
+        COM previsão — adicionar dentro de hist-content:
+        <div class="hist-prev" tabindex="0"
+             onclick="kal('fn_PedidoDeliveryVerPrevisaoEntrega|{{PREVISAO}}')"
+             onkeydown="kalKey(event,'fn_PedidoDeliveryVerPrevisaoEntrega|{{PREVISAO}}')">
+          Previsão: {{PREVISAO}}
+        </div>
+      -->
+      {{HISTORICO_HTML}}
+    </ul>
+  </div>
+
+</div><!-- /painel -->
+
+
+<!-- ════════════════════════════════════════════════════════════════
+     JAVASCRIPT — Comunicação com o Kalipso via location.hash
+     Padrão oficial confirmado pelo projeto HTMLMenu_Sample (SysDev)
+════════════════════════════════════════════════════════════════ -->
+<script>
+/*
+ * kal(hash)
+ * ─────────────────────────────────────────────────────────────────
+ * Envia uma ação para o Kalipso Studio via location.hash.
+ * Formato: 'fn_PedidoDeliveryNomeDaFuncao|valor1|valor2|...'
+ *
+ * O Kalipso captura via evento OnHashChange do HTMLView e roteia
+ * para a Function correta usando Split('|')[0] como nome da função.
+ *
+ * Baseado no padrão oficial do arquivo Diamont.html (HTMLMenu_Sample).
+ */
+function kal(hash) {
+  location.hash = hash;
+}
+
+/*
+ * kalKey(event, hash)
+ * ─────────────────────────────────────────────────────────────────
+ * Mesma chamada ativada por teclado (Enter=13 ou Space=32).
+ * Garante acessibilidade em elementos com tabindex="0".
+ */
+function kalKey(event, hash) {
+  if (event.keyCode === 13 || event.keyCode === 32) {
+    event.preventDefault();
+    kal(hash);
+  }
+}
+
+/*
+ * MAPEAMENTO COMPLETO DE HASHES
+ * ─────────────────────────────────────────────────────────────────
+ * Elemento clicado               → Hash gerado
+ * ─────────────────────────────────────────────────────────────────
+ * Linha de item                  → fn_PedidoDeliveryEditarItem|ID|NOME|QTD|VALOR
+ * Logradouro / Complemento       → fn_PedidoDeliveryEditarEndereco|VALOR_DO_CAMPO
+ * Badge CEP                      → fn_PedidoDeliveryBuscarCEP|CEP
+ * Referência                     → fn_PedidoDeliveryEditarReferencia|TEXTO
+ * Forma de Pagamento             → fn_PedidoDeliveryAlterarPagamento|PIX
+ * Tipo de Entrega                → fn_PedidoDeliveryAlterarTipoEntrega|Normal
+ * Tempo Estimado                 → fn_PedidoDeliveryAlterarTempoEstimado|25
+ * Observação                     → fn_PedidoDeliveryEditarObservacao|TEXTO
+ * Item do histórico              → fn_PedidoDeliveryVerDetalheHistorico|ID|HORA|DESC
+ * Link de previsão               → fn_PedidoDeliveryVerPrevisaoEntrega|13:20 - 13:40
+ *
+ * No Kalipso — fn_PedidoDeliveryRoteadorHash(pParam):
+ *   var aPartes := Split(pParam, '|');
+ *   var sFn     := aPartes[0];  // nome da function
+ *   var sVal1   := aPartes[1];  // primeiro valor (se houver)
+ *   ...
+ */
+</script>
+
+</body>
+</html>
