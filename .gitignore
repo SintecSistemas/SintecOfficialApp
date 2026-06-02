@@ -4,3 +4,4 @@ AutoSave/
 Deploy/
 User Backups/
 .git/
+.lock
