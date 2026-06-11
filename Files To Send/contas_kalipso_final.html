@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestão de Caixa - Sintec ERP</title>
+<style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --blue-dark: #00508c;
+            --blue-mid: #006bb8;
+            --blue-bg: #002b4d;
+            --green: #16a34a;
+            --orange: #ea580c;
+            --red: #dc2626;
+            --teal: #0d9488;
+            --purple: #7c3aed;
+        }
+        body { background: var(--blue-bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; min-height: 100vh; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
+        #app { width: 100%; max-width: 480px; background: #f9fafb; min-height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+        /* HEADER */
+        .header { background: var(--blue-dark); color: white; padding: 32px 16px 16px; border-radius: 0 0 24px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header-title-group p { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #bfdbfe; font-weight: 700; }
+        .header-title-group h1 { font-size: 22px; font-weight: 800; }
+        .header-btns { display: flex; gap: 8px; }
+        .header-btn { width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: transform 0.15s; }
+        .header-btn:active { transform: scale(0.92); }
+        .btn-robot { background: linear-gradient(135deg, #14b8a6, #10b981); color: white; }
+        .btn-magic { background: linear-gradient(135deg, #eab308, #f59e0b); color: white; }
+        .btn-filter { background: #006bb8; color: white; }
+
+        /* DASHBOARD CARD */
+        .dash-card { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; }
+        .dash-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+        .dash-label { font-size: 11px; color: #bfdbfe; font-weight: 500; margin-bottom: 4px; }
+        .dash-value-main { font-size: 26px; font-weight: 800; }
+        .dash-label-right { font-size: 11px; color: #fecaca; font-weight: 500; margin-bottom: 4px; text-align: right; }
+        .dash-value-right { font-size: 18px; font-weight: 700; color: #fee2e2; text-align: right; }
+        .dash-bottom { display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 12px; }
+        .dash-sub-label { font-size: 10px; text-transform: uppercase; font-weight: 600; color: #bfdbfe; margin-bottom: 2px; }
+        .dash-sub-val-orange { font-size: 14px; font-weight: 700; color: #fdba74; }
+        .dash-sub-val-green { font-size: 14px; font-weight: 700; color: #86efac; }
+
+        /* SEARCH + TABS */
+        .search-bar-area { padding: 12px 16px 8px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+        .search-wrap { position: relative; margin-bottom: 10px; }
+        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 13px; }
+        .search-input { width: 100%; padding: 10px 16px 10px 38px; background: white; border: 1px solid #e5e7eb; border-radius: 20px; font-size: 13px; outline: none; }
+        .search-input:focus { border-color: var(--blue-dark); box-shadow: 0 0 0 2px rgba(0,80,140,0.15); }
+        .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; border: 1px solid #e5e7eb; background: white; color: #4b5563; transition: all 0.15s; }
+        .tab-btn.active { background: var(--blue-dark); color: white; border-color: var(--blue-dark); box-shadow: 0 1px 4px rgba(0,80,140,0.3); }
+
+        /* LIST */
+        .list-area { flex: 1; overflow-y: auto; padding: 8px 16px 100px; }
+        .list-area::-webkit-scrollbar { display: none; }
+        .card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 10px; border: 1px solid #f3f4f6; box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: box-shadow 0.15s; }
+        .card.despesa { border-color: #fee2e2; }
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; }
+        .card-name { font-size: 13px; font-weight: 700; color: #111827; margin-bottom: 4px; line-height: 1.3; }
+        .card-name.despesa { color: #7f1d1d; }
+        .card-produto { font-size: 11px; font-weight: 700; color: var(--blue-mid); display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+        .card-produto.despesa { color: #ef4444; }
+        .card-date { font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 4px; }
+        .card-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+        .card-value { font-size: 14px; font-weight: 800; color: #111827; }
+        .card-value.green { color: var(--green); }
+        .card-value.red { color: var(--red); }
+
+        /* BADGES */
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-orange { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+        .badge-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .badge-red { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+        /* EXPANDED */
+        .card-expanded { margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+        .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; font-size: 12px; margin-bottom: 16px; }
+        .card-grid-label { color: #9ca3af; font-weight: 500; margin-bottom: 2px; }
+        .card-grid-val { font-weight: 600; color: #111827; }
+        .card-grid-val.red { color: #ef4444; }
+        .action-btns { display: flex; flex-direction: column; gap: 8px; }
+        .btn-row { display: flex; gap: 8px; }
+        .btn { border: none; cursor: pointer; font-weight: 700; border-radius: 12px; font-size: 12px; padding: 10px 0; display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity 0.15s; width: 100%; }
+        .btn:active { opacity: 0.8; }
+        .btn-baixa { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; flex: 1; }
+        .btn-cobrar { background: linear-gradient(135deg, #2563eb, #4f46e5); color: white; flex: 1; box-shadow: 0 2px 6px rgba(37,99,235,0.3); }
+        .btn-teal { background: linear-gradient(135deg, var(--teal), #10b981); color: white; box-shadow: 0 2px 6px rgba(13,148,136,0.3); }
+        .btn-purple { background: linear-gradient(135deg, var(--purple), #db2777); color: white; box-shadow: 0 2px 6px rgba(124,58,237,0.3); }
+        .btn-gray { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+        .chevron-btn { width: 100%; display: flex; justify-content: center; padding: 4px 0; margin-top: 6px; background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 11px; }
+
+        /* FAB */
+        .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid)); color: white; border: none; cursor: pointer; font-size: 22px; box-shadow: 0 6px 20px rgba(0,80,140,0.45); display: flex; align-items: center; justify-content: center; transition: transform 0.15s; z-index: 20; }
+        .fab:active { transform: scale(0.92); }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 60px 20px; color: #9ca3af; }
+        .empty-state i { font-size: 48px; opacity: 0.3; color: var(--blue-dark); margin-bottom: 16px; display: block; }
+        .empty-state p { font-size: 14px; font-weight: 600; }
+
+        /* MODAIS */
+        .modal-overlay { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(0,0,0,0.6); }
+        .modal-overlay.hidden { display: none; }
+        .modal-backdrop { flex: 1; }
+        .modal-sheet { background: white; width: 100%; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; box-shadow: 0 -8px 40px rgba(0,0,0,0.2); max-height: 92vh; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #f3f4f6; flex-shrink: 0; }
+        .modal-title { font-weight: 700; font-size: 15px; color: #111827; }
+        .modal-close { background: none; border: none; cursor: pointer; padding: 6px; color: #9ca3af; font-size: 18px; border-radius: 50%; }
+        .modal-close:hover { background: #f3f4f6; }
+        .modal-body { flex: 1; overflow-y: auto; padding: 16px; }
+        .modal-body::-webkit-scrollbar { display: none; }
+        .modal-footer { padding: 16px; background: #f9fafb; border-top: 1px solid #f3f4f6; display: flex; gap: 10px; flex-shrink: 0; border-radius: 0 0 0 0; }
+
+        /* ADD MODAL TABS */
+        .add-tabs { display: flex; background: #f3f4f6; padding: 4px; border-radius: 12px; margin: 12px 16px 0; gap: 0; flex-shrink: 0; }
+        .add-tab { flex: 1; padding: 8px 4px; font-size: 11px; font-weight: 700; border: none; background: none; cursor: pointer; border-radius: 10px; color: #6b7280; transition: all 0.15s; }
+        .add-tab.active { background: white; color: var(--blue-dark); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+        .add-tab.active.despesa { background: #fef2f2; color: var(--red); }
+
+        /* FORM */
+        .form-group { margin-bottom: 14px; }
+        .form-label { font-size: 11px; font-weight: 700; color: #6b7280; margin-left: 4px; margin-bottom: 4px; display: block; }
+        .form-label.red { color: #b91c1c; }
+        .form-input { width: 100%; padding: 10px 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 13px; outline: none; }
+        .form-input:focus { background: white; border-color: var(--blue-dark); box-shadow: 0 0 0 2px rgba(0,80,140,0.12); }
+        .form-input.red-border { border-color: #fecaca; background: #fff; }
+        .form-input.red-border:focus { border-color: var(--red); box-shadow: 0 0 0 2px rgba(220,38,38,0.12); }
+        .form-select { width: 100%; padding: 10px 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 13px; outline: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-5-1 { display: grid; grid-template-columns: 4fr 1fr; gap: 8px; align-items: flex-end; }
+        .ai-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 16px; padding: 12px; margin-bottom: 14px; }
+        .ai-box-title { font-size: 11px; font-weight: 700; color: var(--blue-dark); margin-bottom: 8px; }
+        .ai-textarea { width: 100%; padding: 10px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 12px; resize: none; outline: none; font-family: inherit; }
+        .ai-btn { width: 100%; margin-top: 8px; padding: 9px; background: var(--blue-dark); color: white; border: none; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .section-card { background: rgba(0,0,0,0.03); border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px; margin-bottom: 14px; }
+        .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--blue-dark); margin-bottom: 10px; }
+        .despesa-box { background: #fff5f5; border: 1px solid #fecaca; border-radius: 16px; padding: 16px; }
+        .despesa-icon-wrap { width: 40px; height: 40px; background: #fee2e2; color: var(--red); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 16px; }
+        .despesa-title { color: #7f1d1d; font-weight: 700; font-size: 14px; text-align: center; }
+        .despesa-subtitle { font-size: 10px; color: #ef4444; opacity: 0.7; text-align: center; margin-bottom: 14px; }
+
+        /* CONFLICT MODAL */
+        .conflict-screen { position: absolute; inset: 0; background: rgba(255,255,255,0.97); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; z-index: 60; border-radius: 24px 24px 0 0; }
+        .conflict-icon { width: 56px; height: 56px; background: #fef3c7; color: #d97706; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px; }
+        .conflict-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+        .conflict-text { font-size: 12px; color: #4b5563; line-height: 1.6; margin-bottom: 24px; }
+        .conflict-btns { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+
+        /* CHATBOT */
+        .chat-sheet { height: 85%; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .chat-messages::-webkit-scrollbar { display: none; }
+        .chat-bubble-wrap { display: flex; }
+        .chat-bubble-wrap.user { justify-content: flex-end; }
+        .chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 12px; line-height: 1.5; white-space: pre-wrap; }
+        .chat-bubble.assistant { background: white; border: 1px solid #e5e7eb; color: #111827; border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .chat-bubble.user { background: var(--blue-dark); color: white; border-bottom-right-radius: 4px; }
+        .chat-input-row { padding: 12px 16px; background: white; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; flex-shrink: 0; }
+        .chat-input { flex: 1; padding: 10px 14px; background: #f3f4f6; border: none; border-radius: 12px; font-size: 12px; outline: none; font-family: inherit; }
+        .chat-send { width: 44px; height: 44px; background: var(--teal); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .chat-send:disabled { opacity: 0.4; }
+
+        /* COBRANÇA MODAL */
+        .tone-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+        .tone-btn { padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; color: #4b5563; }
+        .tone-btn.active { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        .ai-result-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; position: relative; min-height: 80px; }
+        .ai-result-text { font-size: 12px; color: #374151; line-height: 1.6; white-space: pre-wrap; }
+        .copy-btn { position: absolute; bottom: 8px; right: 8px; background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 14px; }
+        .copy-btn:hover { color: var(--blue-dark); }
+
+        /* RENEGOCIACAO */
+        .deal-card { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+        .deal-card-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #6d28d9; margin-bottom: 6px; }
+        .deal-card-desc { font-size: 11px; color: #5b21b6; opacity: 0.8; margin-bottom: 10px; line-height: 1.5; }
+
+        /* INSIGHTS */
+        .insights-text { font-size: 12px; color: #374151; line-height: 1.7; white-space: pre-wrap; }
+
+        /* TOAST */
+        .toast { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 100; background: rgba(17,24,39,0.95); color: white; padding: 12px 16px; border-radius: 12px; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 90%; box-shadow: 0 8px 24px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
+        .toast.show { opacity: 1; pointer-events: all; }
+        .toast-close { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 13px; flex-shrink: 0; }
+
+        /* FILTER MODAL */
+        .filter-sheet { height: 82%; }
+
+        /* ===================================================== */
+        /*  TELA DE LOADING E OVERLAY (CORRIGIDO)               */
+        /* ===================================================== */
+        #loader-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(249, 250, 251, 0.5); /* leve transparência */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #00508c;
+            font-weight: 500;
+            font-size: 1.1em;
+            transition: opacity 0.4s ease;
+        }
+
+        /* LOADER (ÚNICA DEFINIÇÃO, SEM DUPLICATAS) */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            position: relative;
+            animation: rotate 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        .loader::before , .loader::after {
+            content: "";
+            box-sizing: border-box;
+            position: absolute;
+            inset: 0px;
+            border-radius: 50%;
+            border: 5px solid var(--blue-dark);
+            animation: prixClipFix 2s linear infinite;
+        }
+        .loader::after {
+            inset: 8px;
+            transform: rotate3d(90, 90, 0, 180deg);
+            border-color: var(--orange);
+        }
+
+        @keyframes rotate {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes prixClipFix {
+            0%   { clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0); }
+            50%  { clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0); }
+            75%, 100% { clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%); }
+        }
+
+        /* NOVO CLIENTE MODAL */
+        .new-client-overlay { position: absolute; inset: 0; z-index: 70; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(0,0,0,0.5); }
+        .new-client-overlay.hidden { display: none; }
+
+        .loading-dots { display: flex; align-items: center; gap: 4px; }
+        .dot { width: 7px; height: 7px; background: #9ca3af; border-radius: 50%; animation: bounce 1s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.1s; }
+        .dot:nth-child(3) { animation-delay: 0.2s; }
+        @keyframes bounce { 0%,80%,100%{transform:scale(1)} 40%{transform:scale(1.4)} }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="loader-overlay">
+            <div class="loader"></div> 
+            <div>Buscando dados... <span style="font-size:9px;opacity:0.5">v3</span></div>
+    </div>
+    <!-- TOAST -->
+    <div id="toast" class="toast">
+        <span id="toast-msg"></span>
+        <button class="toast-close" onclick="hideToast()">✕</button>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-top">
+            <div class="header-title-group">
+                <p>ERP SintecPriori</p>
+                <h1>Gestão de Caixa</h1>
+            </div>
+            <div class="header-btns">
+                <button class="header-btn btn-robot" onclick="openChatbot()" title="Caixa Virtual IA">🤖</button>
+                <button class="header-btn btn-magic" onclick="openInsights()" title="Insights">✨</button>
+                <button class="header-btn btn-filter" onclick="openFilterModal()" title="Filtros">⚗️</button>
+            </div>
+        </div>
+        <div class="dash-card">
+            <div class="dash-row" style="align-items: flex-end;">
+                <div>
+                    <div class="dash-label">
+                        A RECEBER<br>
+                        <span style="font-size: 0.85em; font-weight: normal; opacity: 0.9;">(ATÉ 45 DIAS)</span>
+                    </div>
+                    <div class="dash-value-main" id="total-pendente">R$ 0,00</div>
+                </div>
+                <div>
+                    <div class="dash-label-right">
+                        RECEBIDO<br>
+                        <span style="font-size: 0.85em; font-weight: normal; opacity: 0.9;">(ÚLT. 90 DIAS)</span>
+                    </div>
+                    <div class="dash-value-right" id="total-pago">R$ 0,00</div>
+                </div>
+            </div>
+            
+            <div class="dash-bottom">
+                <div>
+                    <div class="dash-sub-label">Total Geral</div>
+                    <div class="dash-sub-val-orange" id="total-geral">R$ 0,00</div>
+                </div>
+                <div>
+                    <div class="dash-sub-label">Eficiência</div>
+                    <div class="dash-sub-val-green" id="total-eficiencia">0%</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SEARCH + TABS -->
+    <div class="search-bar-area">
+        <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" type="text" placeholder="Buscar por cliente, produto, número..." id="search-input" oninput="renderList()">
+        </div>
+        <div class="tabs" id="tabs">
+            <button class="tab-btn active" onclick="setTab('Todos', this)">Todos</button>
+            <button class="tab-btn" onclick="setTab('Abertos', this)">Abertos</button>
+            <button class="tab-btn" onclick="setTab('Atrasados', this)">Atrasados</button>
+            <button class="tab-btn" onclick="setTab('Recebidos', this)">Recebidos</button>
+            <button class="tab-btn" onclick="setTab('Despesas', this)">Despesas</button>
+        </div>
+    </div>
+
+    <!-- LIST -->
+    <div class="list-area" id="list-area"></div>
+
+    <!-- FAB -->
+    <button class="fab" onclick="openAddModal()">＋</button>
+
+    <!-- ===================== MODAL: NOVO REGISTRO ===================== -->
+    <div id="modal-add" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeAddModal()"></div>
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <span class="modal-title">➕ Incluir Novo Registro</span>
+                <button class="modal-close" onclick="closeAddModal()">✕</button>
+            </div>
+            <div class="add-tabs">
+                <button class="add-tab active" id="tab-rapido" onclick="setAddTab('rapido')">⚡ Lançamento Rápido</button>
+                <button class="add-tab" id="tab-completo" onclick="setAddTab('completo')">📄 Completo</button>
+                <button class="add-tab" id="tab-despesa" onclick="setAddTab('despesa')">↓ Despesa Rápida</button>
+            </div>
+            <div class="modal-body" id="add-modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-gray" style="flex:1" onclick="closeAddModal()">Cancelar</button>
+                <button class="btn btn-cobrar" style="flex:2" id="btn-salvar" onclick="handlePreSave()">Gerar Conta no Caixa</button>
+            </div>
+            <!-- Conflict screen -->
+            <div id="conflict-screen" class="conflict-screen" style="display:none">
+                <div class="conflict-icon">⚠️</div>
+                <div class="conflict-title">Telefone já Vinculado</div>
+                <div class="conflict-text" id="conflict-text"></div>
+                <div class="conflict-btns">
+                    <button class="btn btn-cobrar" onclick="resolveMerge()">Vincular ao cliente existente</button>
+                    <button class="btn btn-gray" onclick="resolveForce()">Criar novo cadastro</button>
+                    <button style="background:none;border:none;cursor:pointer;font-size:12px;color:#9ca3af;margin-top:4px" onclick="document.getElementById('conflict-screen').style.display='none'">Voltar e Corrigir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: NOVO CLIENTE ===================== -->
+    <div id="modal-novo-cliente" class="new-client-overlay hidden">
+        <div style="flex:1" onclick="closeNovoCliente()"></div>
+        <div class="modal-sheet" style="border-radius:24px 24px 0 0;padding:20px">
+            <div class="modal-header" style="padding:0 0 12px;margin-bottom:16px">
+                <span class="modal-title">👤 Cadastro de Cliente Sintec</span>
+                <button class="modal-close" onclick="closeNovoCliente()">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Razão Social / Nome Completo *</label>
+                <input class="form-input" type="text" id="nc-nome" placeholder="Ex: JOÃO DA SILVA MOTO PEÇAS" style="text-transform:uppercase">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">WhatsApp Celular</label>
+                    <input class="form-input" type="tel" id="nc-tel" placeholder="DDD + Número">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">CPF ou CNPJ</label>
+                    <input class="form-input" type="text" id="nc-cpf" placeholder="Apenas números">
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+                <button class="btn btn-gray" style="flex:1" onclick="closeNovoCliente()">Cancelar</button>
+                <button class="btn btn-cobrar" style="flex:1" onclick="salvarNovoCliente()">Salvar e Selecionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: CHATBOT ===================== -->
+    <div id="modal-chatbot" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeChatbot()"></div>
+        <div class="modal-sheet chat-sheet" style="display:flex;flex-direction:column">
+            <div class="modal-header">
+                <span class="modal-title" style="color:var(--teal)">🤖 Inteligência Artificial de Caixa</span>
+                <button class="modal-close" onclick="closeChatbot()">✕</button>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-row">
+                <input class="chat-input" type="text" id="chat-input" placeholder="Ex: Quanto tenho em atraso este mês?" onkeydown="if(event.key==='Enter')sendChat()">
+                <button class="chat-send" id="chat-send-btn" onclick="sendChat()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: COBRANÇA IA ===================== -->
+    <div id="modal-cobranca" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeModal('modal-cobranca')"></div>
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <span class="modal-title">✨ Assistente de Cobrança IA</span>
+                <button class="modal-close" onclick="closeModal('modal-cobranca')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="tone-btns">
+                    <button class="tone-btn active" id="tone-amigavel" onclick="selectTone('Amigável')">Amigável</button>
+                    <button class="tone-btn" id="tone-profissional" onclick="selectTone('Profissional')">Profissional</button>
+                    <button class="tone-btn" id="tone-urgente" onclick="selectTone('Urgente')">Urgente</button>
+                </div>
+                <div class="ai-result-box" id="cobranca-result">
+                    <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                </div>
+                <button class="btn btn-teal" style="width:100%;margin-top:14px" onclick="openWhatsAppCobranca()">📱 Disparar via WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: RENEGOCIAÇÃO ===================== -->
+    <div id="modal-reneg" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeModal('modal-reneg')"></div>
+        <div class="modal-sheet">
+            <div class="modal-header">
+                <span class="modal-title" style="color:var(--purple)">🤝 Reestruturar Acordos de Dívida</span>
+                <button class="modal-close" onclick="closeModal('modal-reneg')">✕</button>
+            </div>
+            <div class="modal-body" id="reneg-body">
+                <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: OBJEÇÕES ===================== -->
+    <div id="modal-objec" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeModal('modal-objec')"></div>
+        <div class="modal-sheet" style="height:82%">
+            <div class="modal-header">
+                <span class="modal-title" style="color:var(--teal)">💬 Contra-argumentar Objeções</span>
+                <button class="modal-close" onclick="closeModal('modal-objec')">✕</button>
+            </div>
+            <div class="modal-body" id="objec-body">
+                <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: INSIGHTS ===================== -->
+    <div id="modal-insights" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeModal('modal-insights')"></div>
+        <div class="modal-sheet" style="height:75%">
+            <div class="modal-header">
+                <span class="modal-title" style="color:#d97706">📊 Insights e Diagnóstico do Caixa</span>
+                <button class="modal-close" onclick="closeModal('modal-insights')">✕</button>
+            </div>
+            <div class="modal-body" id="insights-body">
+                <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: FILTROS ===================== -->
+    <div id="modal-filter" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeModal('modal-filter')"></div>
+        <div class="modal-sheet filter-sheet">
+            <div class="modal-header">
+                <span class="modal-title">⚗️ Filtros e Seletores do Período</span>
+                <button class="modal-close" onclick="closeModal('modal-filter')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Filtrar por Pessoa</label>
+                    <input class="form-input" type="text" placeholder="Nome ou Razão Social">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Intervalo de Datas</label>
+                    <select class="form-select" style="margin-bottom:8px"><option>Data de Vencimento</option><option>Data de Emissão</option><option>Data de Baixa / Liquidação</option></select>
+                    <div class="grid-2">
+                        <input class="form-input" type="date" value="2026-05-01">
+                        <input class="form-input" type="date" value="2026-05-31">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-gray" style="flex:1">Limpar</button>
+                <button class="btn btn-cobrar" style="flex:2" onclick="closeModal('modal-filter')">Aplicar Filtros</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+// 🎯 FUNÇÃO QUE DESLIGA O LOADER — definida primeiro, com correção do blur
+function desligarLoader() {
+    const loader = document.getElementById('loader-overlay');
+    if (loader) {
+        // Zera imediatamente o backdrop-filter para eliminar o "fantasma" do blur
+        loader.style.backdropFilter = 'none';
+        loader.style.webkitBackdropFilter = 'none';
+        loader.style.background = '#f9fafb'; // mantém fundo sólido durante a transição
+        loader.style.opacity = '0';
+        loader.style.pointerEvents = 'none';
+        // Remove o elemento do DOM após a transição (garante que o blur suma por completo)
+        setTimeout(() => {
+            if (loader.parentNode) loader.parentNode.removeChild(loader);
+        }, 400);
+    }
+}
+// ╔══════════════════════════════════════════════════════════════════════╗
+// ║         GESTÃO DE CAIXA — SINTEC ERP — KALIPSO STUDIO 6           ║
+// ║   Integração HTML com banco de dados via Bridge JavaScript         ║
+// ╚══════════════════════════════════════════════════════════════════════╝
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// [1] CONFIGURAÇÃO — API GEMINI (INTELIGÊNCIA ARTIFICIAL)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Habilita: Cobrança IA, Renegociação, Chatbot, Insights, Categorização
+// Obtenha sua chave em: https://aistudio.google.com/apikey
+// Deixe vazio "" para usar a tela sem IA (dados ainda funcionam normalmente)
+const GEMINI_API_KEY = "";
+// ↑ Exemplo: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// [2] DADOS — ARRAYS POPULADOS PELO KALIPSO
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Estes arrays começam VAZIOS. O Kalipso Studio 6 os preenche
+// chamando as funções de bridge definidas na seção [4] abaixo.
+// Não edite aqui manualmente — os dados vêm do banco de dados.
+
+// ── TÍTULOS / CONTAS A RECEBER / DESPESAS ────────────────────────────
+// Tabela sugerida no Kalipso: TITULOS, CONTASRECEBER ou equivalente
+// Campos mapeados: veja estrutura JSON na seção [4] abaixo
+let titulos = [];
+
+// ── CLIENTES / PESSOAS ───────────────────────────────────────────────
+// Tabela sugerida no Kalipso: CLIENTES, PESSOAS ou equivalente
+// Usado para: autocomplete no formulário de novo lançamento
+let clientesDb = [];
+
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// [3] ESTADO INTERNO DA TELA (não alterar)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let activeTab     = 'Todos';
+let expandedId    = null;
+let addTab        = 'rapido';
+let selectedItem  = null;
+let currentTone   = 'Amigável';
+let conflictState = null;
+let chatHistory   = [{ role: 'assistant', text: 'Olá! Sou o Assistente Financeiro Virtual Sintec. Pergunte qualquer coisa sobre suas contas, clientes ou fluxo de caixa!' }];
+let novoLancamento = {
+    cliente: '', telefone: '', produto: '', valor: '', vencimento: today(),
+    metodoPagamento: 'Pix', tituloNum: '', notaNum: '', parcelas: '1', intervalo: '30',
+    tipoValor: 'Total', emissao: today(), administradora: 'REDE', bandeira: 'VISA'
+};
+
+// ==================== UTILS ====================
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function fmtCurrency(v) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+}
+
+function fmtDate(d) {
+    if (!d || String(d).trim() === '' || d === 'null') return '--/--/----';
+    const str = String(d).trim();
+    // Se o banco já mandar em formato BR (DD/MM/YYYY), exibe direto
+    if (str.includes('/')) return str.split(' ')[0]; 
+    // Se mandar em formato Americano (YYYY-MM-DD), inverte para BR
+    if (str.includes('-')) {
+        const parts = str.split(' ')[0].split('-');
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return str; // Mostra como vier para garantir que não fica vazio
+}
+
+function addDays(dateStr, days) {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + parseInt(days || 0));
+    return d.toISOString().split('T')[0];
+}
+
+// ==================== TOAST ====================
+let toastTimeout;
+function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => t.classList.remove('show'), 4000);
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+// ==================== TOTALS ====================
+function calcTotals() {
+    const hoje = new Date(); const mes = hoje.getMonth(); const ano = hoje.getFullYear();
+    const r = { aReceberMes: 0, recebido: 0, atrasado: 0, despesas: 0 };
+    titulos.forEach(t => {
+        const d = new Date(((t.dataBaixa || t.vencimento)) + 'T00:00:00');
+        const ehMes = d.getMonth() === mes && d.getFullYear() === ano;
+        if (t.tipo === 'despesa') { if (ehMes) r.despesas += t.valorOriginal; }
+        else if (t.status === 'Baixado') { if (ehMes) r.recebido += t.valorOriginal; }
+        else if (t.status === 'Atrasado') { r.atrasado += t.saldoPendente; }
+        else if (t.status === 'Aberto') { if (ehMes) r.aReceberMes += t.saldoPendente; }
+    });
+    return r;
+}
+
+function updateDashboard() {
+    const t = calcTotals();
+    document.getElementById('val-a-receber').textContent = fmtCurrency(t.aReceberMes);
+    document.getElementById('val-despesas').textContent = fmtCurrency(t.despesas);
+    document.getElementById('val-atrasado').textContent = fmtCurrency(t.atrasado);
+    document.getElementById('val-recebido').textContent = fmtCurrency(t.recebido);
+}
+
+// ==================== LIST ====================
+function setTab(tab, el) {
+    activeTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderList();
+}
+
+function getBadge(item) {
+    if (item.tipo === 'despesa') return `<span class="badge badge-red">↓ Saída</span>`;
+    const st = String(item.status || '').toLowerCase();
+    if (st === 'baixado' || st === 'pago') return `<span class="badge badge-green">✔ Pago</span>`;
+    if (st === 'atrasado') return `<span class="badge badge-orange">⚠ Atrasado</span>`;
+    return `<span class="badge badge-blue">🕐 A Vencer</span>`;
+}
+
+function renderList() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    
+    // 🛡️ 1. O ESCUDO PROTETOR (Resolve os R$ NaN e Datas vazias)
+    const titulosSeguros = titulos.map(t => {
+        // Limpa R$, troca vírgula por ponto e força virar um número real
+        const getNum = (val) => {
+            if (typeof val === 'number') return val;
+            if (!val) return 0;
+            let s = String(val).replace(/[R$\s]/g, '').trim();
+            if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+            return parseFloat(s) || 0;
+        };
+
+        return {
+            ...t,
+            id: t.id || t.ID || Math.random(),
+            // Pega o nome do cliente não importa a coluna (cliente, CLIENTE, nome, NOME)
+            cliente: t.cliente || t.CLIENTE || t.nome || t.NOME || 'Cliente não informado',
+            produto: t.produto || t.PRODUTO || t.descricao || '',
+            documento: t.documento || t.DOCUMENTO || t.doc || 'S/N',
+            parcela: t.parcela || t.PARCELA || '',
+            tipo: String(t.tipo || t.TIPO || 'receita').toLowerCase(),
+            status: t.status || t.STATUS || 'Pendente',
+            vencimento: t.vencimento || t.VENCIMENTO || t.data || t.DATA_VENCIMENTO || '',
+            dataBaixa: t.dataBaixa || t.DATA_BAIXA || t.pagamento || '',
+            valorOriginal: getNum(t.valorOriginal || t.VALOR_ORIGINAL || t.valor || t.VALOR),
+            saldoPendente: getNum(t.saldoPendente || t.SALDO_PENDENTE || t.saldo || t.valorOriginal || t.valor || t.VALOR),
+            juros: getNum(t.juros || t.JUROS),
+            multa: getNum(t.multa || t.MULTA),
+            telefone: t.telefone || t.TELEFONE || ''
+        };
+    });
+
+    // 2. FILTRAGEM
+    const filtered = titulosSeguros.filter(item => {
+        const match = item.cliente.toLowerCase().includes(query) || item.documento.toLowerCase().includes(query) || item.produto.toLowerCase().includes(query);
+        if (!match) return false;
+        
+        const st = item.status.toLowerCase();
+        if (activeTab === 'Despesas') return item.tipo === 'despesa';
+        if (item.tipo === 'despesa') return false;
+        
+        if (activeTab === 'Abertos') return st === 'aberto' || st === 'pendente';
+        if (activeTab === 'Atrasados') return st === 'atrasado';
+        if (activeTab === 'Recebidos') return st === 'baixado' || st === 'pago';
+        return true;
+    });
+
+    const area = document.getElementById('list-area');
+    if (filtered.length === 0) {
+        area.innerHTML = `<div class="empty-state"><i>📄</i><p>Nenhum registro encontrado nesta visualização.</p></div>`;
+        return;
+    }
+
+    // 3. MONTAGEM DOS CARTÕES NA TELA
+    area.innerHTML = filtered.map(item => {
+        const isDesp = item.tipo === 'despesa';
+        const isExp = expandedId === item.id;
+        const st = item.status.toLowerCase();
+        const isPago = (st === 'baixado' || st === 'pago');
+        
+        // Regra de Valor: Se está pago ou é despesa = Original. Se está aberto = Pendente.
+        const val = (isPago || isDesp) ? item.valorOriginal : item.saldoPendente;
+        const valClass = isDesp ? 'red' : (isPago ? 'green' : '');
+
+        // Regra de Data: Se está pago e tem data de baixa = Data Baixa. Senão = Vencimento.
+        const dataExibicao = (isPago && item.dataBaixa) ? item.dataBaixa : item.vencimento;
+        const textoData = isPago ? 'Pago em' : (st === 'atrasado' ? 'Venceu em' : 'Vence em');
+
+        // Exibição da Parcela
+        const infoParcela = item.parcela ? `<span style="font-size: 11px; color: var(--blue-mid); font-weight: 800; margin-left: 6px;">(Parc. ${item.parcela})</span>` : '';
+
+        // Exibição de Multa/Juros (Só aparece se o valor for maior que zero!)
+        const totalJurosMulta = item.juros + item.multa;
+        const jurosBadge = (totalJurosMulta > 0 && !isDesp) ? `<div style="font-size: 11px; color: var(--red); font-weight: 700; margin-top: 4px; display: inline-flex; background: #fef2f2; padding: 2px 8px; border-radius: 6px; border: 1px solid #fecaca;">+ ${fmtCurrency(totalJurosMulta)} de encargos</div>` : '';
+
+        let expanded = '';
+        if (isExp) {
+            let actionBtns = '';
+            if (!isDesp) {
+                const baixaBtn = !isPago ? `<div class="btn-row"><button class="btn btn-baixa" onclick="marcarBaixado(${item.id})">✔ Dar Baixa</button><button class="btn btn-cobrar" onclick="openCobrancaModal(${item.id})">✨ Cobrança IA</button></div>` : '';
+                const objecBtn = !isPago ? `<button class="btn btn-teal" onclick="openObjecModal(${item.id})">💬 Simular Objeções de Cliente ✨</button>` : '';
+                const renegBtn = st === 'atrasado' ? `<button class="btn btn-purple" onclick="openRenegModal(${item.id})">🤝 Gerar Proposta de Acordo IA ✨</button>` : '';
+                const waBtn = `<button class="btn btn-gray" onclick="window.open('https://wa.me/${item.telefone || ''}?text=${encodeURIComponent('Olá! Entramos em contato para verificar pendências em aberto.')}','_blank')">📱 WhatsApp Padrão</button>`;
+                actionBtns = `<div class="action-btns">${baixaBtn}${objecBtn}${renegBtn}${waBtn}</div>`;
+            }
+            expanded = `
+            <div class="card-expanded">
+                <div class="card-grid">
+                    <div><div class="card-grid-label">Documento</div><div class="card-grid-val">${item.documento}</div></div>
+                    <div><div class="card-grid-label">Valor Original</div><div class="card-grid-val">${fmtCurrency(item.valorOriginal)}</div></div>
+                    ${(!isDesp && totalJurosMulta > 0) ? `<div><div class="card-grid-label">Multas e Juros (Incluso)</div><div class="card-grid-val red">${fmtCurrency(totalJurosMulta)}</div></div>` : ''}
+                </div>
+                ${actionBtns}
+            </div>`;
+        }
+
+        return `<div class="card${isDesp ? ' despesa' : ''}" id="card-${item.id}">
+            <div class="card-top" onclick="toggleExpand(${item.id})">
+                <div style="flex:1;padding-right:12px">
+                    <div class="card-name${isDesp ? ' despesa' : ''}">${item.cliente} ${infoParcela}</div>
+                    ${item.produto ? `<div class="card-produto${isDesp ? ' despesa' : ''}">🏷 ${item.produto}</div>` : ''}
+                    <div class="card-date">📅 ${textoData} ${fmtDate(dataExibicao)}</div>
+                    ${jurosBadge}
+                </div>
+                <div class="card-right">
+                    <span class="card-value ${valClass}">${isDesp ? '-' : ''}${fmtCurrency(val)}</span>
+                    ${getBadge(item)}
+                </div>
+            </div>
+            ${expanded}
+            <button class="chevron-btn" onclick="toggleExpand(${item.id})">${isExp ? '▲' : '▼'}</button>
+        </div>`;
+    }).join('');
+}
+
+function toggleExpand(id) {
+    expandedId = expandedId === id ? null : id;
+    renderList();
+}
+
+function marcarBaixado(id) {
+    titulos = titulos.map(t => t.id === id ? { ...t, status: 'Baixado', saldoPendente: 0, dataBaixa: today() } : t);
+    window.location.href = `kalipso://darbaixa?id=${id}`;
+    expandedId = null;
+    renderList();
+    updateDashboard();
+    showToast('Título baixado com sucesso!', 'success');
+}
+
+// ==================== ADD MODAL ====================
+function openAddModal() {
+    document.getElementById('modal-add').classList.remove('hidden');
+    setAddTab('rapido');
+}
+function closeAddModal() {
+    document.getElementById('modal-add').classList.add('hidden');
+    document.getElementById('conflict-screen').style.display = 'none';
+    resetNovoLancamento();
+}
+function resetNovoLancamento() {
+    novoLancamento = { cliente: '', telefone: '', produto: '', valor: '', vencimento: today(), metodoPagamento: 'Pix', tituloNum: '', notaNum: '', parcelas: '1', intervalo: '30', tipoValor: 'Total', emissao: today(), administradora: 'REDE', bandeira: 'VISA' };
+    renderAddForm();
+}
+
+function setAddTab(tab) {
+    addTab = tab;
+    ['rapido','completo','despesa'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        el.classList.remove('active');
+        if (t === tab) el.classList.add('active');
+    });
+    const saveBtn = document.getElementById('btn-salvar');
+    saveBtn.textContent = tab === 'despesa' ? 'Validar Despesa' : 'Gerar Conta no Caixa';
+    if (tab === 'despesa') {
+        saveBtn.style.background = 'var(--red)';
+        document.getElementById('tab-despesa').classList.add('despesa');
+    } else {
+        saveBtn.style.background = '';
+        saveBtn.style.backgroundImage = '';
+    }
+    renderAddForm();
+}
+
+function renderAddForm() {
+    const body = document.getElementById('add-modal-body');
+    if (addTab === 'rapido') {
+        body.innerHTML = `
+        <div class="ai-box">
+            <div class="ai-box-title">✨ Assistente de Preenchimento via IA</div>
+            <textarea class="ai-textarea" id="ai-text" rows="2" placeholder="Ex: Lancei duzentos reais do cliente Roberto para vencer dia 20 do mês que vem referente a revisão de filtros...">${novoLancamento.aiText || ''}</textarea>
+            <button class="ai-btn" onclick="parseWithAI()">🪄 Processar Comando por Voz/Texto</button>
+        </div>
+        <div class="form-group">
+            <div class="grid-5-1">
+                <div>
+                    <label class="form-label">Cliente / Titular *</label>
+                    <input class="form-input" type="text" id="f-cliente" placeholder="Digite ou selecione" value="${novoLancamento.cliente}" oninput="novoLancamento.cliente=this.value" style="text-transform:uppercase">
+                </div>
+                <div>
+                    <button class="btn btn-cobrar" style="height:42px;padding:0;font-size:16px" onclick="openNovoCliente()" title="Cadastrar Nova Pessoa">👤+</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">WhatsApp (Fator de Busca/Vínculo)</label>
+            <input class="form-input" type="tel" id="f-tel" placeholder="Ex: 41999999999" value="${novoLancamento.telefone}" oninput="novoLancamento.telefone=this.value">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Serviço ou Produto Ocorrido</label>
+            <input class="form-input" type="text" id="f-produto" placeholder="Ex: Manutenção de Bomba d'água" value="${novoLancamento.produto}" oninput="novoLancamento.produto=this.value">
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label">Valor do Título (R$) *</label>
+                <input class="form-input" type="text" id="f-valor" placeholder="0,00" value="${novoLancamento.valor}" oninput="novoLancamento.valor=this.value">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Data Vencimento</label>
+                <input class="form-input" type="date" id="f-venc" value="${novoLancamento.vencimento}" oninput="novoLancamento.vencimento=this.value">
+            </div>
+        </div>`;
+    } else if (addTab === 'completo') {
+        body.innerHTML = `
+        <div class="section-card">
+            <div class="section-title">🪪 Identificação e Nota</div>
+            <div class="form-group" style="margin-bottom:10px">
+                <div class="grid-5-1">
+                    <div>
+                        <label class="form-label">Cliente / Pessoa Titular *</label>
+                        <input class="form-input" type="text" placeholder="Selecione ou digite" value="${novoLancamento.cliente}" oninput="novoLancamento.cliente=this.value" style="text-transform:uppercase">
+                    </div>
+                    <button class="btn btn-cobrar" style="height:38px;padding:0;font-size:14px" onclick="openNovoCliente()">👤+</button>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group"><label class="form-label">Número do Título</label><input class="form-input" type="text" placeholder="Ex: 20229" value="${novoLancamento.tituloNum}" oninput="novoLancamento.tituloNum=this.value"></div>
+                <div class="form-group"><label class="form-label">Nº Nota Fiscal</label><input class="form-input" type="text" placeholder="Ex: 351" value="${novoLancamento.notaNum}" oninput="novoLancamento.notaNum=this.value"></div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group"><label class="form-label">Data Emissão</label><input class="form-input" type="date" value="${novoLancamento.emissao}" oninput="novoLancamento.emissao=this.value"></div>
+                <div class="form-group"><label class="form-label">Data Vencimento (1º)</label><input class="form-input" type="date" value="${novoLancamento.vencimento}" oninput="novoLancamento.vencimento=this.value"></div>
+            </div>
+        </div>
+        <div class="section-card">
+            <div class="section-title">💰 Valor e Parcelas</div>
+            <div class="grid-2">
+                <div class="form-group"><label class="form-label">Valor *</label><input class="form-input" type="text" placeholder="0,00" value="${novoLancamento.valor}" oninput="novoLancamento.valor=this.value"></div>
+                <div class="form-group"><label class="form-label">Parcelas</label><input class="form-input" type="number" min="1" value="${novoLancamento.parcelas}" oninput="novoLancamento.parcelas=this.value"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Intervalo (Dias)</label><input class="form-input" type="number" min="1" value="${novoLancamento.intervalo}" oninput="novoLancamento.intervalo=this.value"></div>
+        </div>
+        <div class="section-card">
+            <div class="section-title">💳 Dados de Cartão / TEF</div>
+            <div class="grid-2">
+                <div class="form-group"><label class="form-label">Administradora</label><select class="form-select"><option>REDE</option><option>CIELO</option><option>STONE</option><option>GETNET</option></select></div>
+                <div class="form-group"><label class="form-label">Bandeira</label><select class="form-select"><option>VISA</option><option>MASTERCARD</option><option>ELO</option></select></div>
+            </div>
+        </div>`;
+    } else {
+        body.innerHTML = `
+        <div class="despesa-box">
+            <div class="despesa-icon-wrap">🛍</div>
+            <div class="despesa-title">Validar Despesa de Balcão</div>
+            <div class="despesa-subtitle">Lançamento simplificado para agilizar aprovações e caixa rápido</div>
+            <div class="form-group">
+                <label class="form-label red">O que foi comprado/gasto? *</label>
+                <div style="display:flex;gap:8px">
+                    <input class="form-input red-border" style="flex:1" type="text" placeholder="Ex: Borracha de vedação, Marmitas da equipe..." value="${novoLancamento.produto}" oninput="novoLancamento.produto=this.value">
+                    <button class="btn btn-gray" style="width:44px;flex-shrink:0" onclick="categorizarDespesa()" title="Categorizar via IA">✨</button>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label red">Valor do Gasto *</label>
+                    <input class="form-input red-border" type="text" placeholder="0,00" value="${novoLancamento.valor}" oninput="novoLancamento.valor=this.value">
+                </div>
+                <div class="form-group">
+                    <label class="form-label red">Forma de Saída</label>
+                    <select class="form-select red-border" oninput="novoLancamento.metodoPagamento=this.value">
+                        <option value="Pix">Pix imediato da Loja</option>
+                        <option value="Dinheiro">Dinheiro (Sangria da Gaveta)</option>
+                        <option value="Cartao Corporativo">Cartão de Crédito Empresa</option>
+                    </select>
+                </div>
+            </div>
+        </div>`;
+    }
+}
+
+// ==================== SAVE ====================
+function handlePreSave() {
+    if (addTab === 'despesa') {
+        if (!novoLancamento.produto || !novoLancamento.valor) return showToast('Preencha a descrição e o valor!', 'error');
+        finalizeSave();
+        return;
+    }
+    if (!novoLancamento.cliente || !novoLancamento.valor) return showToast('Preencha o cliente e o valor!', 'error');
+
+    if (addTab === 'rapido' && novoLancamento.telefone) {
+        const phone = novoLancamento.telefone.replace(/\D/g, '');
+        if (phone.length >= 10) {
+            const existing = clientesDb.find(c => c.telefone === phone);
+            if (existing && existing.nome !== novoLancamento.cliente.toUpperCase()) {
+                conflictState = { existingName: existing.nome, newName: novoLancamento.cliente.toUpperCase(), phone };
+                const cs = document.getElementById('conflict-screen');
+                document.getElementById('conflict-text').innerHTML = `O número <b>${phone}</b> pertence ao cliente <b>${existing.nome}</b>.<br><br>Deseja unificar ou criar nova ficha para <b>${novoLancamento.cliente.toUpperCase()}</b>?`;
+                cs.style.display = 'flex';
+                cs.style.flexDirection = 'column';
+                cs.style.alignItems = 'center';
+                cs.style.justifyContent = 'center';
+                return;
+            }
+        }
+    }
+    finalizeSave();
+}
+
+function resolveMerge() { finalizeSave(conflictState.existingName); }
+function resolveForce() { finalizeSave(conflictState.newName); }
+
+function finalizeSave(overrideName = null) {
+    const finalName = (overrideName || novoLancamento.cliente).toUpperCase();
+    const val = parseFloat(String(novoLancamento.valor).replace(',', '.')) || 0;
+    const phone = novoLancamento.telefone ? novoLancamento.telefone.replace(/\D/g, '') : '';
+    const novos = [];
+
+    if (!overrideName && phone.length >= 10 && !clientesDb.some(c => c.telefone === phone)) {
+        clientesDb.push({ nome: finalName, telefone: phone });
+    }
+
+    if (addTab === 'despesa') {
+        novos.push({ id: Date.now(), cliente: 'DESPESA: ' + novoLancamento.metodoPagamento, documento: 'DESP-' + Date.now().toString().slice(-4), parcela: '1/1', valorOriginal: val, saldoPendente: val, juros: 0, multa: 0, vencimento: novoLancamento.vencimento, status: 'Baixado', dataBaixa: novoLancamento.vencimento, produto: novoLancamento.produto, tipo: 'despesa', telefone: '' });
+    } else if (addTab === 'rapido') {
+        novos.push({ id: Date.now(), cliente: finalName, documento: 'AVULSO', parcela: '1/1', valorOriginal: val, saldoPendente: val, juros: 0, multa: 0, vencimento: novoLancamento.vencimento, status: 'Aberto', dataBaixa: null, produto: novoLancamento.produto, tipo: 'receita', telefone: phone });
+    } else {
+        const qtd = parseInt(novoLancamento.parcelas) || 1;
+        const interval = parseInt(novoLancamento.intervalo) || 30;
+        const parcVal = novoLancamento.tipoValor === 'Total' && qtd > 1 ? parseFloat((val / qtd).toFixed(2)) : val;
+        for (let i = 1; i <= qtd; i++) {
+            novos.push({ id: Date.now() + i, cliente: finalName, documento: novoLancamento.tituloNum || 'AVULSO', parcela: `${i}/${qtd}`, valorOriginal: parcVal, saldoPendente: parcVal, juros: 0, multa: 0, vencimento: addDays(novoLancamento.vencimento, (i - 1) * interval), status: 'Aberto', dataBaixa: null, produto: novoLancamento.produto || 'Venda', tipo: 'receita', telefone: phone });
+        }
+    }
+
+    titulos = [...novos, ...titulos];
+    window.location.href = `kalipso://novolancamento?data=${encodeURIComponent(JSON.stringify(novos))}`;
+    conflictState = null;
+    closeAddModal();
+    renderList();
+    updateDashboard();
+    showToast(addTab === 'despesa' ? 'Despesa validada com sucesso!' : `${novos.length} registro(s) gerado(s)!`, 'success');
+}
+
+// ==================== NOVO CLIENTE ====================
+function openNovoCliente() { document.getElementById('modal-novo-cliente').classList.remove('hidden'); }
+function closeNovoCliente() { document.getElementById('modal-novo-cliente').classList.add('hidden'); }
+function salvarNovoCliente() {
+    const nome = document.getElementById('nc-nome').value.trim();
+    if (!nome) return showToast('O nome do cliente é obrigatório!', 'error');
+    const tel = document.getElementById('nc-tel').value.replace(/\D/g, '');
+    const cpf = document.getElementById('nc-cpf').value;
+    const n = nome.toUpperCase();
+    clientesDb.push({ nome: n, telefone: tel, cpfCnpj: cpf });
+    novoLancamento.cliente = n;
+    novoLancamento.telefone = tel;
+    closeNovoCliente();
+    renderAddForm();
+    showToast('Cliente registrado e selecionado!', 'success');
+}
+
+// ==================== GEMINI API ====================
+async function callGemini(payload, retries = 3) {
+    if (!GEMINI_API_KEY) throw new Error('API Key do Gemini não configurada.');
+    for (let i = 0; i < retries; i++) {
+        try {
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            });
+            if (r.ok) return await r.json();
+        } catch(e) { if (i === retries - 1) throw e; }
+        await new Promise(res => setTimeout(res, 1000 * Math.pow(2, i)));
+    }
+    throw new Error('Falha na comunicação com IA.');
+}
+
+async function parseWithAI() {
+    const text = document.getElementById('ai-text').value.trim();
+    if (!text) return showToast('Digite as informações primeiro!', 'warning');
+    const btn = document.querySelector('.ai-btn');
+    btn.innerHTML = '<div class="spinner"></div> Processando...';
+    try {
+        const prompt = `Você é um robô de ERP inteligente. Analise a instrução informal de venda do lojista e retorne exclusivamente um JSON válido com a estrutura: { "cliente": "Nome Formatado", "produto": "Serviço Formatado", "valor": 0.00, "vencimento": "AAAA-MM-DD" }`;
+        const res = await callGemini({ contents: [{ parts: [{ text }] }], systemInstruction: { parts: [{ text: prompt }] }, generationConfig: { responseMimeType: "application/json" } });
+        const parsed = JSON.parse(res.candidates?.[0]?.content?.parts?.[0]?.text);
+        novoLancamento.cliente = parsed.cliente || '';
+        novoLancamento.produto = parsed.produto || '';
+        novoLancamento.valor = parsed.valor ? String(parsed.valor) : '';
+        novoLancamento.vencimento = parsed.vencimento || today();
+        renderAddForm();
+        showToast('Formulário preenchido por IA! ✨', 'success');
+    } catch(e) { showToast('Erro no processamento da IA. Configure a API Key.', 'error'); }
+    finally { btn.innerHTML = '🪄 Processar Comando por Voz/Texto'; }
+}
+
+async function categorizarDespesa() {
+    const desc = novoLancamento.produto.trim();
+    if (!desc) return showToast('Digite a descrição da despesa primeiro!', 'warning');
+    try {
+        const p = `A compra/despesa informal: "${desc}". Corrija e sugira categoria contábil. JSON: { "descricaoProfissional": "Nome limpo", "categoria": "Categoria Padronizada" }`;
+        const res = await callGemini({ contents: [{ parts: [{ text: p }] }], generationConfig: { responseMimeType: "application/json" } });
+        const d = JSON.parse(res.candidates?.[0]?.content?.parts?.[0]?.text);
+        novoLancamento.produto = `${d.categoria.toUpperCase()} - ${d.descricaoProfissional}`;
+        renderAddForm();
+        showToast('Despesa categorizada por IA! ✨', 'success');
+    } catch(e) { showToast('Erro de processamento. Configure a API Key.', 'error'); }
+}
+
+// ==================== COBRANÇA IA ====================
+function openCobrancaModal(id) {
+    selectedItem = titulos.find(t => t.id === id);
+    if (!selectedItem) return;
+    document.getElementById('modal-cobranca').classList.remove('hidden');
+    gerarCobranca();
+}
+
+function selectTone(t) {
+    currentTone = t;
+    ['amigavel','profissional','urgente'].forEach(k => document.getElementById('tone-' + k).classList.remove('active'));
+    document.getElementById('tone-' + t.toLowerCase()).classList.add('active');
+    gerarCobranca();
+}
+
+async function gerarCobranca() {
+    const el = document.getElementById('cobranca-result');
+    el.innerHTML = `<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    try {
+        const p = `Redija uma mensagem WhatsApp para o cliente "${selectedItem.cliente}" cobrando o valor pendente de ${fmtCurrency(selectedItem.saldoPendente || selectedItem.valorOriginal)} referente a "${selectedItem.produto || 'venda de mercadoria'}", vencimento em ${fmtDate(selectedItem.vencimento)}. Tom: ${currentTone}. Retorne apenas a mensagem limpa.`;
+        const res = await callGemini({ contents: [{ parts: [{ text: p }] }] });
+        const text = res.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        el.innerHTML = `<div class="ai-result-text">${text}</div><button class="copy-btn" onclick="copyText(this.previousElementSibling.textContent)">📋</button>`;
+    } catch(e) { el.innerHTML = `<div style="color:#ef4444;font-size:12px">Configure a API Key do Gemini para usar IA.</div>`; }
+}
+
+function openWhatsAppCobranca() {
+    const text = document.querySelector('#cobranca-result .ai-result-text')?.textContent || '';
+    window.open(`https://wa.me/${selectedItem?.telefone || ''}?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+// ==================== RENEGOCIAÇÃO ====================
+async function openRenegModal(id) {
+    selectedItem = titulos.find(t => t.id === id);
+    document.getElementById('modal-reneg').classList.remove('hidden');
+    const body = document.getElementById('reneg-body');
+    body.innerHTML = `<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    try {
+        const p = `O cliente "${selectedItem.cliente}" possui débito vencido de ${fmtCurrency(selectedItem.saldoPendente)}. Elabore 3 propostas de acordo. JSON: { "opcoes": [ { "titulo": "Título Curto", "descricao": "Detalhe da vantagem", "valorNovo": "Valor Formatado" } ] }`;
+        const res = await callGemini({ contents: [{ parts: [{ text: p }] }], generationConfig: { responseMimeType: "application/json" } });
+        const data = JSON.parse(res.candidates?.[0]?.content?.parts?.[0]?.text);
+        body.innerHTML = (data.opcoes || []).map(o => `
+            <div class="deal-card">
+                <div class="deal-card-header"><span>${o.titulo}</span><span>${o.valorNovo}</span></div>
+                <div class="deal-card-desc">${o.descricao}</div>
+                <button class="btn btn-purple" onclick="window.open('https://wa.me/${selectedItem?.telefone || ''}?text=${encodeURIComponent('Olá! Temos uma condição especial de renegociação para você: *' + o.titulo + '*. ' + o.descricao + ' Valor ajustado para *' + o.valorNovo + '*. O que acha?')}','_blank')">📱 Propor via WhatsApp</button>
+            </div>`).join('');
+    } catch(e) { body.innerHTML = `<div style="color:#ef4444;font-size:12px;padding:16px">Configure a API Key do Gemini para usar IA.</div>`; }
+}
+
+// ==================== OBJEÇÕES ====================
+async function openObjecModal(id) {
+    selectedItem = titulos.find(t => t.id === id);
+    document.getElementById('modal-objec').classList.remove('hidden');
+    const body = document.getElementById('objec-body');
+    body.innerHTML = `<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    try {
+        const p = `O cliente "${selectedItem.cliente}" deve ${fmtCurrency(selectedItem.valorOriginal)} sobre "${selectedItem.produto}". Simule as 3 principais objeções de inadimplência com contra-argumentação profissional. JSON: { "simulacoes": [ { "objecao": "Texto da desculpa", "resposta": "Resposta do lojista" } ] }`;
+        const res = await callGemini({ contents: [{ parts: [{ text: p }] }], generationConfig: { responseMimeType: "application/json" } });
+        const data = JSON.parse(res.candidates?.[0]?.content?.parts?.[0]?.text);
+        body.innerHTML = (data.simulacoes || []).map(s => `
+            <div style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:12px;margin-bottom:10px">
+                <p style="font-size:12px;color:#be123c;font-weight:700;margin-bottom:6px">Inadimplente: "${s.objecao}"</p>
+                <p style="font-size:12px;color:#134e4a;background:white;padding:10px;border-radius:8px;line-height:1.5;margin-bottom:6px"><b>Resposta sugerida:</b> ${s.resposta}</p>
+                <button style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--teal);font-weight:700;text-decoration:underline" onclick="copyText('${s.resposta.replace(/'/g,"\\'")}')">Copiar Resposta</button>
+            </div>`).join('');
+    } catch(e) { body.innerHTML = `<div style="color:#ef4444;font-size:12px;padding:16px">Configure a API Key do Gemini para usar IA.</div>`; }
+}
+
+// ==================== INSIGHTS ====================
+async function openInsights() {
+    document.getElementById('modal-insights').classList.remove('hidden');
+    const body = document.getElementById('insights-body');
+    body.innerHTML = `<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    try {
+        const p = `Faça um diagnóstico rápido de saúde financeira com base nestes dados: ${JSON.stringify(titulos.map(t => ({ cliente: t.cliente, valor: t.valorOriginal, status: t.status, tipo: t.tipo })))}. Forneça 4 insights acionáveis com marcadores.`;
+        const res = await callGemini({ contents: [{ parts: [{ text: p }] }] });
+        const text = res.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        body.innerHTML = `<div class="insights-text">${text}</div>`;
+    } catch(e) { body.innerHTML = `<div style="color:#ef4444;font-size:12px;padding:16px">Configure a API Key do Gemini para usar IA.</div>`; }
+}
+
+// ==================== CHATBOT ====================
+function openChatbot() {
+    document.getElementById('modal-chatbot').classList.remove('hidden');
+    renderChatMessages();
+}
+function closeChatbot() { document.getElementById('modal-chatbot').classList.add('hidden'); }
+
+function renderChatMessages() {
+    const area = document.getElementById('chat-messages');
+    area.innerHTML = chatHistory.map(m => `
+        <div class="chat-bubble-wrap ${m.role}">
+            <div class="chat-bubble ${m.role}">${m.text}</div>
+        </div>`).join('');
+    area.scrollTop = area.scrollHeight;
+}
+
+async function sendChat() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    chatHistory.push({ role: 'user', text });
+    input.value = '';
+    renderChatMessages();
+    const btn = document.getElementById('chat-send-btn');
+    btn.disabled = true;
+    try {
+        const sys = `Você é o assistente virtual financeiro do ERP SintecPriori. Dados atuais: ${JSON.stringify(titulos)}. Responda de forma objetiva, curta e use emojis. Foque em respostas rápidas para lojistas.`;
+        const prompt = chatHistory.map(h => `${h.role === 'user' ? 'Lojista' : 'Assistente'}: ${h.text}`).join('\n') + '\nAssistente:';
+        const res = await callGemini({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: sys }] } });
+        const reply = res.candidates?.[0]?.content?.parts?.[0]?.text || 'Não consegui processar.';
+        chatHistory.push({ role: 'assistant', text: reply });
+    } catch(e) {
+        chatHistory.push({ role: 'assistant', text: 'Configure a API Key do Gemini para usar o assistente de IA.' });
+    }
+    btn.disabled = false;
+    renderChatMessages();
+}
+
+// ==================== UTILS MODALS ====================
+function openFilterModal() { document.getElementById('modal-filter').classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function copyText(text) {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); showToast('Texto copiado!', 'success'); } catch(e) {}
+    document.body.removeChild(ta);
+}
+
+// ==================== BRIDGE KALIPSO STUDIO 6 ====================
+//
+// Como usar no Kalipso Studio 6:
+//
+// 1. CARREGAR TITULOS (contas a receber + despesas):
+//    Chame: window.carregarTitulos(jsonString)
+//    JSON esperado (array de objetos):
+//    [
+//      {
+//        "id": 1,                          -- ID único do registro
+//        "cliente": "NOME DO CLIENTE",     -- Razão social / nome
+//        "telefone": "41999999999",        -- WhatsApp (só números)
+//        "documento": "20229",             -- Número do título/documento
+//        "parcela": "1/3",                 -- Ex: "1/3", "2/3"
+//        "valorOriginal": 500.00,          -- Valor original do título
+//        "saldoPendente": 520.00,          -- Saldo com juros/multa
+//        "juros": 15.00,                   -- Juros acumulados
+//        "multa": 5.00,                    -- Multa acumulada
+//        "vencimento": "2026-06-15",       -- Data no formato AAAA-MM-DD
+//        "dataBaixa": null,                -- null se em aberto, ou "AAAA-MM-DD"
+//        "status": "Aberto",               -- "Aberto" | "Atrasado" | "Baixado"
+//        "produto": "Descrição do produto",-- Produto ou serviço
+//        "tipo": "receita"                 -- "receita" | "despesa"
+//      }
+//    ]
+//
+// 2. CARREGAR CLIENTES (base de clientes para o formulário):
+//    Chame: window.carregarClientes(jsonString)
+//    JSON esperado (array de objetos):
+//    [
+//      {
+//        "nome": "NOME COMPLETO",
+//        "telefone": "41999999999",
+//        "cpfCnpj": "123.456.789-00"
+//      }
+//    ]
+//
+// 3. RECEBER EVENTO DE BAIXA (quando usuário dá baixa na tela):
+//    A tela dispara: window.location.href = "kalipso://darbaixa?id=ID"
+//    Capture este evento no Kalipso e baixe o título no banco.
+//
+// 4. RECEBER EVENTO DE NOVO LANÇAMENTO:
+//    A tela dispara: window.location.href = "kalipso://novolancamento?data=JSON"
+//    O JSON contém o array dos novos títulos gerados.
+//    Capture no Kalipso e grave no banco de dados.
+//
+// 5. ATUALIZAR DADOS SEM RECARREGAR A TELA:
+//    Chame: window.atualizarTela()
+//    Reprocessa totais e lista com os dados atuais em memória.
+
+window.carregarTitulos = function(jsonStr) {
+    try {
+        titulos = JSON.parse(jsonStr);
+        renderList();
+        updateDashboard();
+    } catch(e) {
+        showToast('Erro ao carregar títulos do banco.', 'error');
+        console.error('carregarTitulos error:', e);
+    }
+};
+
+window.carregarClientes = function(jsonStr) {
+    try {
+        clientesDb = JSON.parse(jsonStr);
+    } catch(e) {
+        console.error('carregarClientes error:', e);
+    }
+};
+
+// Mantido para compatibilidade com versão anterior
+window.updateKalipsoData = window.carregarTitulos;
+
+window.atualizarTela = function() {
+    renderList();
+    updateDashboard();
+};
+
+// ==================== INIT ====================
+updateDashboard();
+renderList();
+renderAddForm();
+
+// ═══════════════════════════════════════════════════════════════
+// FUNÇÃO PRINCIPAL CHAMADA PELO KALIPSO (CORRIGIDA)
+// ═══════════════════════════════════════════════════════════════
+function carregarDadosDoKalipso(jsonString) {
+    try {
+        // 1. Converte a string enviada pelo Kalipso e popula a sua variável global
+        titulos = JSON.parse(jsonString);
+
+        // 2. Inicializa as variáveis acumuladoras
+        let somaPendente = 0;
+        let somaPago = 0;
+
+        // 3. Passa de linha em linha para somar baseado no status que o Kalipso tratou
+        titulos.forEach(t => {
+            // Converte o valor para float com segurança
+            let valor = parseFloat(t.valorOriginal) || 0;
+
+            if (t.status === "Pendente") {
+                somaPendente += valor;
+            } else if (t.status === "Pago") {
+                somaPago += valor;
+            }
+        });
+
+        // 4. Calcula os indicadores extras (Total Geral e Eficiência)
+        let totalGeral = somaPendente + somaPago;
+        let eficiencia = totalGeral > 0 ? Math.round((somaPago / totalGeral) * 100) : 0;
+
+        // 5. Formatação para o padrão monetário brasileiro (R$)
+        const formatoMoeda = { style: 'currency', currency: 'BRL' };
+        
+        // 6. Injeta os dados nos elementos HTML do Topo usando os IDs criados
+        const elPendente = document.getElementById('total-pendente');
+        const elPago = document.getElementById('total-pago');
+        const elGeral = document.getElementById('total-geral');
+        const elEficiencia = document.getElementById('total-eficiencia');
+
+        if (elPendente) elPendente.innerText = somaPendente.toLocaleString('pt-BR', formatoMoeda);
+        if (elPago) elPago.innerText = somaPago.toLocaleString('pt-BR', formatoMoeda);
+        if (elGeral) elGeral.innerText = totalGeral.toLocaleString('pt-BR', formatoMoeda);
+        if (elEficiencia) elEficiencia.innerText = eficiencia + "%";
+
+        // 7. Renderiza a lista inferior de cards automaticamente
+        renderList();
+
+        // ✅ CORREÇÃO: desliga o loader após processar com sucesso
+        desligarLoader();
+
+    } catch (error) {
+        console.error("Erro ao processar dados vindos do Kalipso:", error);
+        // ✅ CORREÇÃO: desliga o loader mesmo em caso de erro
+        desligarLoader();
+    }
+}
+
+
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// [4] BRIDGE — FUNÇÕES CHAMADAS PELO KALIPSO STUDIO 6
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
+// ┌─────────────────────────────────────────────────────────────────┐
+// │ KALIPSO → HTML                                                  │
+// │ Chame estas funções no evento OnLoad do controle HTMLViewer     │
+// └─────────────────────────────────────────────────────────────────┘
+//
+// ── A) CARREGAR TÍTULOS ─────────────────────────────────────────────
+// Função: window.carregarTitulos(jsonString)
+window.carregarTitulos = function(jsonStr) {
+    try {
+        titulos = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+        renderList();
+        updateDashboard();
+        console.log('[Kalipso Bridge] Títulos carregados:', titulos.length);
+        
+        // 🎯 LUGAR 1: Desliga o loader imediatamente porque deu certo!
+        desligarLoader();
+        
+    } catch(e) {
+        showToast('Erro ao carregar títulos do banco.', 'error');
+        console.error('[Kalipso Bridge] carregarTitulos error:', e);
+        
+        // 🎯 LUGAR 2: Desliga o loader imediatamente em caso de ficheiro corrompido
+        desligarLoader();
+    }
+};
+
+// ── B) CARREGAR CLIENTES ─────────────────────────────────────────────
+// Função: window.carregarClientes(jsonString)
+//
+// Estrutura JSON esperada (array de objetos):
+// [
+//   {
+//     "nome"     : "RAZAO SOCIAL OU NOME", ← Campo: CLIENTES.NOME ou RAZAO_SOCIAL
+//     "telefone" : "41999999999",           ← Campo: CLIENTES.FONE_CELULAR (só números)
+//     "cpfCnpj"  : "123.456.789-00"         ← Campo: CLIENTES.CPF ou CNPJ
+//   }
+// ]
+//
+window.carregarClientes = function(jsonStr) {
+    try {
+        clientesDb = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+        console.log('[Kalipso Bridge] Clientes carregados:', clientesDb.length);
+    } catch(e) {
+        console.error('[Kalipso Bridge] carregarClientes error:', e);
+    }
+};
+
+// ── C) ATUALIZAR TELA SEM RECARREGAR ────────────────────────────────
+// Função: window.atualizarTela()
+// Útil para recalcular totais após uma operação externa no Kalipso
+window.atualizarTela = function() {
+    renderList();
+    updateDashboard();
+};
+
+// Aliases de compatibilidade
+window.updateKalipsoData = window.carregarTitulos;
+
+// Buffer: o Kalipso deposita o JSON aqui se a página ainda não estiver pronta
+window._kalipsoBuffer = null;
+window._kalipsoJaCarregou = false;
+
+// Função chamada pelo Kalipso via ExecuteScript
+window.carregarDadosDoKalipso = function(jsonStr) {
+    console.log('[Bridge] carregarDadosDoKalipso recebido, tamanho:', String(jsonStr).length);
+    window._kalipsoBuffer = jsonStr;
+    _processarBufferKalipso();
+};
+
+function _processarBufferKalipso() {
+    if (window._kalipsoJaCarregou) return; // evita rodar duas vezes
+    if (window._kalipsoBuffer === null) return; // ainda não chegou nada
+
+    try {
+        var jsonStr = String(window._kalipsoBuffer);
+        jsonStr = jsonStr.replace(/^\uFEFF/, '').trim();
+
+        if (!jsonStr.startsWith('[')) {
+            throw new Error('JSON não começa com [. Recebido: ' + jsonStr.substring(0, 80));
+        }
+
+        var dados = JSON.parse(jsonStr);
+        window._kalipsoJaCarregou = true;
+        window.carregarTitulos(dados);
+
+    } catch(e) {
+        console.error('[Bridge] Erro ao processar JSON:', e.message);
+        window._kalipsoJaCarregou = true;
+        desligarLoader();
+    }
+}
+
+// Polling: verifica a cada 200ms se o buffer foi preenchido (caso o Kalipso
+// dispare o ExecuteScript antes do HTML terminar de carregar)
+var _poolingTentativas = 0;
+var _poolingTimer = setInterval(function() {
+    _poolingTentativas++;
+    if (window._kalipsoJaCarregou || _poolingTentativas > 50) {
+        clearInterval(_poolingTimer); // para após sucesso ou 10 segundos
+        return;
+    }
+    if (window._kalipsoBuffer !== null) {
+        clearInterval(_poolingTimer);
+        _processarBufferKalipso();
+    }
+}, 200);
+
+
+// ┌─────────────────────────────────────────────────────────────────┐
+// │ HTML → KALIPSO                                                  │
+// │ A tela dispara eventos via window.location.href                │
+// │ Capture no Kalipso usando o evento OnNavigate do HTMLViewer    │
+// └─────────────────────────────────────────────────────────────────┘
+//
+// ── D) EVENTO: DAR BAIXA EM TÍTULO ───────────────────────────────────
+// Disparado quando: usuário clica em "✔ Dar Baixa" em um título
+// URL capturada: kalipso://darbaixa?id=ID_DO_TITULO
+//   → Extraia o parâmetro "id" e execute UPDATE em TITULOS.DT_BAIXA
+//   → Após gravar, chame window.atualizarTela() para refletir a mudança
+//
+// Código Kalipso (exemplo Delphi):
+//   var sID := GetURLParam(sURL, 'id');
+//   // UPDATE TITULOS SET DT_BAIXA = :hoje WHERE ID_TITULO = :sID
+//   HTMLViewer1.ExecuteScript('window.atualizarTela()');
+//
+// ── E) EVENTO: NOVO LANÇAMENTO ────────────────────────────────────────
+// Disparado quando: usuário salva pelo formulário de inclusão
+// URL capturada: kalipso://novolancamento?data=JSON_ENCODADO
+//   → Decodifique o parâmetro "data" (URL decode) e parse o JSON
+//   → O JSON é um array com os novos títulos gerados (pode ser 1 ou N parcelas)
+//   → Insira cada item no banco e chame window.carregarTitulos() para recarregar
+//
+// Código Kalipso (exemplo Delphi):
+//   var sData := URLDecode(GetURLParam(sURL, 'data'));
+//   var oTitulos := ParseJSON(sData); // array
+//   for each titulo in oTitulos do
+//     // INSERT INTO TITULOS (...) VALUES (...)
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// [5] INICIALIZAÇÃO DA TELA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// A tela inicia vazia. Os dados chegam pelo Kalipso via [4] acima.
+updateDashboard();
+renderList();
+renderAddForm();
+
+// 🎯 TRAVA DE SEGURANÇA:
+// Se em 15 segundos o Kalipso não enviar nada, liberta a tela à força!
+setTimeout(() => {
+    if (!window._kalipsoJaCarregou) {
+        console.warn('[Bridge] Timeout: Kalipso não respondeu em 15s, liberando tela.');
+        desligarLoader();
+    }
+}, 15000);
+
+</script>
+</body>
+</html>
