@@ -16,8 +16,41 @@
             --teal: #0d9488;
             --purple: #7c3aed;
         }
-        body { background: var(--blue-bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; min-height: 100vh; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--blue-bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; height: 100vh; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
         #app { width: 100%; max-width: 480px; background: #f9fafb; min-height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+        /* Estilo da caixa de sugestões */
+.sugestoes-box {
+    position: absolute;
+    top: 100%; /* Fica exatamente abaixo do input */
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0 0 12px 12px; /* Arredondado embaixo */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+/* Estilo de cada item da lista */
+.sugestao-item {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.sugestao-item:last-child {
+    border-bottom: none;
+}
+
+.sugestao-item:hover {
+    background-color: #eff6ff;
+    color: var(--blue-dark);
+}
 
         /* HEADER */
         .header { background: var(--blue-dark); color: white; padding: 32px 16px 16px; border-radius: 0 0 24px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10; }
@@ -151,20 +184,6 @@
         .conflict-text { font-size: 12px; color: #4b5563; line-height: 1.6; margin-bottom: 24px; }
         .conflict-btns { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 
-        /* CHATBOT */
-        .chat-sheet { height: 85%; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .chat-messages::-webkit-scrollbar { display: none; }
-        .chat-bubble-wrap { display: flex; }
-        .chat-bubble-wrap.user { justify-content: flex-end; }
-        .chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 12px; line-height: 1.5; white-space: pre-wrap; }
-        .chat-bubble.assistant { background: white; border: 1px solid #e5e7eb; color: #111827; border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-        .chat-bubble.user { background: var(--blue-dark); color: white; border-bottom-right-radius: 4px; }
-        .chat-input-row { padding: 12px 16px; background: white; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; flex-shrink: 0; }
-        .chat-input { flex: 1; padding: 10px 14px; background: #f3f4f6; border: none; border-radius: 12px; font-size: 12px; outline: none; font-family: inherit; }
-        .chat-send { width: 44px; height: 44px; background: var(--teal); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .chat-send:disabled { opacity: 0.4; }
-
         /* COBRANÇA MODAL */
         .tone-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
         .tone-btn { padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; color: #4b5563; }
@@ -178,9 +197,6 @@
         .deal-card { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
         .deal-card-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #6d28d9; margin-bottom: 6px; }
         .deal-card-desc { font-size: 11px; color: #5b21b6; opacity: 0.8; margin-bottom: 10px; line-height: 1.5; }
-
-        /* INSIGHTS */
-        .insights-text { font-size: 12px; color: #374151; line-height: 1.7; white-space: pre-wrap; }
 
         /* TOAST */
         .toast { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 100; background: rgba(17,24,39,0.95); color: white; padding: 12px 16px; border-radius: 12px; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 90%; box-shadow: 0 8px 24px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
@@ -272,12 +288,16 @@
         <div class="header-top">
             <div class="header-title-group">
                 <p>ERP SintecPriori</p>
-                <h1>Gestão de Caixa</h1>
+                <h1>Contas a Receber</h1>
             </div>
             <div class="header-btns">
-                <button class="header-btn btn-robot" onclick="openChatbot()" title="Caixa Virtual IA">🤖</button>
-                <button class="header-btn btn-magic" onclick="openInsights()" title="Insights">✨</button>
-                <button class="header-btn btn-filter" onclick="openFilterModal()" title="Filtros">⚗️</button>
+                <button class="header-btn btn-filter" onclick="openFilterModal()" title="Filtros">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                    </svg>
+
+                </button>
             </div>
         </div>
         <div class="dash-card">
@@ -327,7 +347,8 @@
     </div>
 
     <!-- LIST -->
-    <div class="list-area" id="list-area"></div>
+    <div class="list-area" id="list-area">
+    </div>
 
     <!-- FAB -->
     <button class="fab" onclick="openAddModal()">＋</button>
@@ -364,6 +385,50 @@
         </div>
     </div>
 
+        <!-- ===================== MODAL: FILTROS ===================== -->
+   <div id="modal-filter" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeModal('modal-filter')"></div>
+        <div class="modal-sheet filter-sheet">
+            <div class="modal-header">
+                <span class="modal-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                    </svg>
+                    Filtros e Seletores do Período
+                </span>
+                <button class="modal-close" onclick="closeModal('modal-filter')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="position: relative;">
+                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Filtrar por Pessoa</label>
+                    <input id="inputPessoa" class="form-input" type="text" placeholder="Nome ou Razão Social" autocomplete="off" onkeyup="mostrarSugestoes()">
+                    <div id="listaSugestoes" class="sugestoes-box" style="display: none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Intervalo de Datas</label>
+                    <select class="form-select" style="margin-bottom:8px">
+                        <option>Data de Vencimento</option>
+                        <option>Data de Emissão</option>
+                        <option>Data de Baixa</option>
+                        <option>Nenhum</option>
+                        <option>Vencidos</option>
+                        <option>Pendente</option>
+                    </select>
+                    <div class="grid-2">
+                        <input class="form-input" type="date" value="2026-05-01">
+                        <input class="form-input" type="date" value="2026-05-31">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-gray" style="flex:1">Limpar</button>
+                <button class="btn btn-cobrar" style="flex:2" onclick="closeModal('modal-filter')">Aplicar Filtros</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- ===================== MODAL: NOVO CLIENTE ===================== -->
     <div id="modal-novo-cliente" class="new-client-overlay hidden">
         <div style="flex:1" onclick="closeNovoCliente()"></div>
@@ -389,22 +454,6 @@
             <div style="display:flex;gap:10px;margin-top:8px">
                 <button class="btn btn-gray" style="flex:1" onclick="closeNovoCliente()">Cancelar</button>
                 <button class="btn btn-cobrar" style="flex:1" onclick="salvarNovoCliente()">Salvar e Selecionar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== MODAL: CHATBOT ===================== -->
-    <div id="modal-chatbot" class="modal-overlay hidden">
-        <div class="modal-backdrop" onclick="closeChatbot()"></div>
-        <div class="modal-sheet chat-sheet" style="display:flex;flex-direction:column">
-            <div class="modal-header">
-                <span class="modal-title" style="color:var(--teal)">🤖 Inteligência Artificial de Caixa</span>
-                <button class="modal-close" onclick="closeChatbot()">✕</button>
-            </div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-row">
-                <input class="chat-input" type="text" id="chat-input" placeholder="Ex: Quanto tenho em atraso este mês?" onkeydown="if(event.key==='Enter')sendChat()">
-                <button class="chat-send" id="chat-send-btn" onclick="sendChat()">➤</button>
             </div>
         </div>
     </div>
@@ -458,52 +507,76 @@
             </div>
         </div>
     </div>
-
-    <!-- ===================== MODAL: INSIGHTS ===================== -->
-    <div id="modal-insights" class="modal-overlay hidden">
-        <div class="modal-backdrop" onclick="closeModal('modal-insights')"></div>
-        <div class="modal-sheet" style="height:75%">
-            <div class="modal-header">
-                <span class="modal-title" style="color:#d97706">📊 Insights e Diagnóstico do Caixa</span>
-                <button class="modal-close" onclick="closeModal('modal-insights')">✕</button>
-            </div>
-            <div class="modal-body" id="insights-body">
-                <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== MODAL: FILTROS ===================== -->
-    <div id="modal-filter" class="modal-overlay hidden">
-        <div class="modal-backdrop" onclick="closeModal('modal-filter')"></div>
-        <div class="modal-sheet filter-sheet">
-            <div class="modal-header">
-                <span class="modal-title">⚗️ Filtros e Seletores do Período</span>
-                <button class="modal-close" onclick="closeModal('modal-filter')">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Filtrar por Pessoa</label>
-                    <input class="form-input" type="text" placeholder="Nome ou Razão Social">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Intervalo de Datas</label>
-                    <select class="form-select" style="margin-bottom:8px"><option>Data de Vencimento</option><option>Data de Emissão</option><option>Data de Baixa / Liquidação</option></select>
-                    <div class="grid-2">
-                        <input class="form-input" type="date" value="2026-05-01">
-                        <input class="form-input" type="date" value="2026-05-31">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-gray" style="flex:1">Limpar</button>
-                <button class="btn btn-cobrar" style="flex:2" onclick="closeModal('modal-filter')">Aplicar Filtros</button>
-            </div>
-        </div>
-    </div>
-
 </div>
+
 <script>
+
+    // Função para extrair apenas os nomes únicos da sua lista atual
+function obterNomesUnicos() {
+    // IMPORTANTE: Troque "titulos" pelo nome da variável onde você guarda os dados na tela
+    // e "nomePessoa" pela propriedade que guarda o nome do cliente.
+    const nomes = titulos.map(titulo => titulo.nomePessoa); 
+    
+    // O Set remove nomes duplicados para não aparecer "Lucas" 5 vezes na lista
+    return [...new Set(nomes)]; 
+}
+
+function mostrarSugestoes() {
+    const input = document.getElementById("inputPessoa");
+    const lista = document.getElementById("listaSugestoes");
+    const valorDigitado = input.value.toLowerCase();
+    
+    // Limpa a lista anterior
+    lista.innerHTML = "";
+
+    // Se o usuário apagou tudo, esconde a caixa de sugestões
+    if (valorDigitado.length === 0) {
+        lista.style.display = "none";
+        return;
+    }
+
+    const nomesUnicos = obterNomesUnicos();
+    
+    // Filtra os nomes que contêm o que o usuário digitou
+    const sugestoes = nomesUnicos.filter(nome => 
+        nome.toLowerCase().includes(valorDigitado)
+    );
+
+    // Se não encontrou ninguém, esconde a lista
+    if (sugestoes.length === 0) {
+        lista.style.display = "none";
+        return;
+    }
+
+    // Cria os itens da lista
+    sugestoes.forEach(nome => {
+        const divItem = document.createElement("div");
+        divItem.classList.add("sugestao-item");
+        divItem.innerText = nome;
+        
+        // Quando clicar na sugestão, preenche o input e fecha a lista
+        divItem.onclick = function() {
+            input.value = nome;
+            lista.style.display = "none";
+        };
+        
+        lista.appendChild(divItem);
+    });
+
+    // Mostra a caixa de sugestões
+    lista.style.display = "block";
+}
+
+// Opcional: Fechar a lista de sugestões se o usuário clicar fora dela
+document.addEventListener("click", function(e) {
+    const input = document.getElementById("inputPessoa");
+    const lista = document.getElementById("listaSugestoes");
+    if (e.target !== input && e.target !== lista) {
+        lista.style.display = "none";
+    }
+});
+
+
 // 🎯 FUNÇÃO QUE DESLIGA O LOADER — definida primeiro, com correção do blur
 function desligarLoader() {
     const loader = document.getElementById('loader-overlay');
@@ -521,18 +594,9 @@ function desligarLoader() {
     }
 }
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║         GESTÃO DE CAIXA — SINTEC ERP — KALIPSO STUDIO 6           ║
-// ║   Integração HTML com banco de dados via Bridge JavaScript         ║
+// ║         GESTÃO DE CAIXA — SINTEC ERP — KALIPSO STUDIO 6              ║
+// ║   Integração HTML com banco de dados via Bridge JavaScript           ║
 // ╚══════════════════════════════════════════════════════════════════════╝
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// [1] CONFIGURAÇÃO — API GEMINI (INTELIGÊNCIA ARTIFICIAL)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Habilita: Cobrança IA, Renegociação, Chatbot, Insights, Categorização
-// Obtenha sua chave em: https://aistudio.google.com/apikey
-// Deixe vazio "" para usar a tela sem IA (dados ainda funcionam normalmente)
-const GEMINI_API_KEY = "";
-// ↑ Exemplo: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1189,57 +1253,6 @@ async function openObjecModal(id) {
     } catch(e) { body.innerHTML = `<div style="color:#ef4444;font-size:12px;padding:16px">Configure a API Key do Gemini para usar IA.</div>`; }
 }
 
-// ==================== INSIGHTS ====================
-async function openInsights() {
-    document.getElementById('modal-insights').classList.remove('hidden');
-    const body = document.getElementById('insights-body');
-    body.innerHTML = `<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
-    try {
-        const p = `Faça um diagnóstico rápido de saúde financeira com base nestes dados: ${JSON.stringify(titulos.map(t => ({ cliente: t.cliente, valor: t.valorOriginal, status: t.status, tipo: t.tipo })))}. Forneça 4 insights acionáveis com marcadores.`;
-        const res = await callGemini({ contents: [{ parts: [{ text: p }] }] });
-        const text = res.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        body.innerHTML = `<div class="insights-text">${text}</div>`;
-    } catch(e) { body.innerHTML = `<div style="color:#ef4444;font-size:12px;padding:16px">Configure a API Key do Gemini para usar IA.</div>`; }
-}
-
-// ==================== CHATBOT ====================
-function openChatbot() {
-    document.getElementById('modal-chatbot').classList.remove('hidden');
-    renderChatMessages();
-}
-function closeChatbot() { document.getElementById('modal-chatbot').classList.add('hidden'); }
-
-function renderChatMessages() {
-    const area = document.getElementById('chat-messages');
-    area.innerHTML = chatHistory.map(m => `
-        <div class="chat-bubble-wrap ${m.role}">
-            <div class="chat-bubble ${m.role}">${m.text}</div>
-        </div>`).join('');
-    area.scrollTop = area.scrollHeight;
-}
-
-async function sendChat() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text) return;
-    chatHistory.push({ role: 'user', text });
-    input.value = '';
-    renderChatMessages();
-    const btn = document.getElementById('chat-send-btn');
-    btn.disabled = true;
-    try {
-        const sys = `Você é o assistente virtual financeiro do ERP SintecPriori. Dados atuais: ${JSON.stringify(titulos)}. Responda de forma objetiva, curta e use emojis. Foque em respostas rápidas para lojistas.`;
-        const prompt = chatHistory.map(h => `${h.role === 'user' ? 'Lojista' : 'Assistente'}: ${h.text}`).join('\n') + '\nAssistente:';
-        const res = await callGemini({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: sys }] } });
-        const reply = res.candidates?.[0]?.content?.parts?.[0]?.text || 'Não consegui processar.';
-        chatHistory.push({ role: 'assistant', text: reply });
-    } catch(e) {
-        chatHistory.push({ role: 'assistant', text: 'Configure a API Key do Gemini para usar o assistente de IA.' });
-    }
-    btn.disabled = false;
-    renderChatMessages();
-}
-
 // ==================== UTILS MODALS ====================
 function openFilterModal() { document.getElementById('modal-filter').classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -1546,6 +1559,80 @@ setTimeout(() => {
         desligarLoader();
     }
 }, 15000);
+
+// ==========================================
+// SISTEMA DE AUTOCOMPLETAR PESSOAS
+// ==========================================
+
+// Extrai nomes únicos baseados na chave correta do seu array ('cliente')
+function obterNomesUnicos() {
+    // Mapeia usando a propriedade correta do seu objeto (titulo.cliente)
+    const nomes = titulos.map(titulo => titulo.cliente); 
+    
+    // Filtra nomes vazios/indefinidos e remove as duplicações
+    const nomesValidos = nomes.filter(nome => nome && nome.trim() !== "");
+    return [...new Set(nomesValidos)]; 
+}
+
+function mostrarSugestoes() {
+    const input = document.getElementById("inputPessoa");
+    const lista = document.getElementById("listaSugestoes");
+    
+    if (!input || !lista) return; // Trava de segurança
+    
+    const valorDigitado = input.value.toLowerCase();
+    
+    // Limpa a lista anterior
+    lista.innerHTML = "";
+
+    // Se apagou tudo, esconde
+    if (valorDigitado.length === 0) {
+        lista.style.display = "none";
+        return;
+    }
+
+    const nomesUnicos = obterNomesUnicos();
+    
+    // Filtra para encontrar quem bate com a digitação
+    const sugestoes = nomesUnicos.filter(nome => 
+        nome.toLowerCase().includes(valorDigitado)
+    );
+
+    // Se não tem resultados, esconde a caixa
+    if (sugestoes.length === 0) {
+        lista.style.display = "none";
+        return;
+    }
+
+    // Cria as divs para cada cliente encontrado
+    sugestoes.forEach(nome => {
+        const divItem = document.createElement("div");
+        divItem.classList.add("sugestao-item");
+        divItem.innerText = nome;
+        
+        // Clicar no nome joga ele pro input e fecha a caixa
+        divItem.onclick = function() {
+            input.value = nome;
+            lista.style.display = "none";
+        };
+        
+        lista.appendChild(divItem);
+    });
+
+    // Exibe a caixinha
+    lista.style.display = "block";
+}
+
+// Clicar fora da caixa fecha as sugestões
+document.addEventListener("click", function(e) {
+    const input = document.getElementById("inputPessoa");
+    const lista = document.getElementById("listaSugestoes");
+    if (input && lista) {
+        if (e.target !== input && e.target !== lista) {
+            lista.style.display = "none";
+        }
+    }
+});
 
 </script>
 </body>
