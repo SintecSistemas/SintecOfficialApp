@@ -16,8 +16,41 @@
             --teal: #0d9488;
             --purple: #7c3aed;
         }
-        body { background: var(--blue-bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; min-height: 100vh; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--blue-bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1f2937; height: 100vh; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
         #app { width: 100%; max-width: 480px; background: #f9fafb; min-height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+        /* Estilo da caixa de sugestões */
+.sugestoes-box {
+    position: absolute;
+    top: 100%; /* Fica exatamente abaixo do input */
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0 0 12px 12px; /* Arredondado embaixo */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+/* Estilo de cada item da lista */
+.sugestao-item {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.sugestao-item:last-child {
+    border-bottom: none;
+}
+
+.sugestao-item:hover {
+    background-color: #eff6ff;
+    color: var(--blue-dark);
+}
 
         /* HEADER */
         .header { background: var(--blue-dark); color: white; padding: 32px 16px 16px; border-radius: 0 0 24px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10; }
@@ -151,20 +184,6 @@
         .conflict-text { font-size: 12px; color: #4b5563; line-height: 1.6; margin-bottom: 24px; }
         .conflict-btns { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 
-        /* CHATBOT */
-        .chat-sheet { height: 85%; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-        .chat-messages::-webkit-scrollbar { display: none; }
-        .chat-bubble-wrap { display: flex; }
-        .chat-bubble-wrap.user { justify-content: flex-end; }
-        .chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 12px; line-height: 1.5; white-space: pre-wrap; }
-        .chat-bubble.assistant { background: white; border: 1px solid #e5e7eb; color: #111827; border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-        .chat-bubble.user { background: var(--blue-dark); color: white; border-bottom-right-radius: 4px; }
-        .chat-input-row { padding: 12px 16px; background: white; border-top: 1px solid #e5e7eb; display: flex; gap: 8px; flex-shrink: 0; }
-        .chat-input { flex: 1; padding: 10px 14px; background: #f3f4f6; border: none; border-radius: 12px; font-size: 12px; outline: none; font-family: inherit; }
-        .chat-send { width: 44px; height: 44px; background: var(--teal); color: white; border: none; border-radius: 12px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .chat-send:disabled { opacity: 0.4; }
-
         /* COBRANÇA MODAL */
         .tone-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
         .tone-btn { padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; color: #4b5563; }
@@ -178,9 +197,6 @@
         .deal-card { background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
         .deal-card-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #6d28d9; margin-bottom: 6px; }
         .deal-card-desc { font-size: 11px; color: #5b21b6; opacity: 0.8; margin-bottom: 10px; line-height: 1.5; }
-
-        /* INSIGHTS */
-        .insights-text { font-size: 12px; color: #374151; line-height: 1.7; white-space: pre-wrap; }
 
         /* TOAST */
         .toast { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 100; background: rgba(17,24,39,0.95); color: white; padding: 12px 16px; border-radius: 12px; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 90%; box-shadow: 0 8px 24px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
@@ -272,12 +288,16 @@
         <div class="header-top">
             <div class="header-title-group">
                 <p>ERP SintecPriori</p>
-                <h1>Gestão de Caixa</h1>
+                <h1>Contas a Receber</h1>
             </div>
             <div class="header-btns">
-                <button class="header-btn btn-robot" onclick="openChatbot()" title="Caixa Virtual IA">🤖</button>
-                <button class="header-btn btn-magic" onclick="openInsights()" title="Insights">✨</button>
-                <button class="header-btn btn-filter" onclick="openFilterModal()" title="Filtros">⚗️</button>
+                <button class="header-btn btn-filter" onclick="openFilterModal()" title="Filtros">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                    </svg>
+
+                </button>
             </div>
         </div>
         <div class="dash-card">
@@ -327,7 +347,8 @@
     </div>
 
     <!-- LIST -->
-    <div class="list-area" id="list-area"></div>
+    <div class="list-area" id="list-area">
+    </div>
 
     <!-- FAB -->
     <button class="fab" onclick="openAddModal()">＋</button>
@@ -364,6 +385,50 @@
         </div>
     </div>
 
+        <!-- ===================== MODAL: FILTROS ===================== -->
+   <div id="modal-filter" class="modal-overlay hidden">
+        <div class="modal-backdrop" onclick="closeModal('modal-filter')"></div>
+        <div class="modal-sheet filter-sheet">
+            <div class="modal-header">
+                <span class="modal-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                    <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2z"/>
+                    </svg>
+                    Filtros e Seletores do Período
+                </span>
+                <button class="modal-close" onclick="closeModal('modal-filter')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="position: relative;">
+                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Filtrar por Pessoa</label>
+                    <input id="inputPessoa" class="form-input" type="text" placeholder="Nome ou Razão Social" autocomplete="off" onkeyup="mostrarSugestoes()">
+                    <div id="listaSugestoes" class="sugestoes-box" style="display: none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Intervalo de Datas</label>
+                    <select class="form-select" style="margin-bottom:8px">
+                        <option>Data de Vencimento</option>
+                        <option>Data de Emissão</option>
+                        <option>Data de Baixa</option>
+                        <option>Nenhum</option>
+                        <option>Vencidos</option>
+                        <option>Pendente</option>
+                    </select>
+                    <div class="grid-2">
+                        <input class="form-input" type="date" value="2026-05-01">
+                        <input class="form-input" type="date" value="2026-05-31">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-gray" style="flex:1">Limpar</button>
+                <button class="btn btn-cobrar" style="flex:2" onclick="closeModal('modal-filter')">Aplicar Filtros</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- ===================== MODAL: NOVO CLIENTE ===================== -->
     <div id="modal-novo-cliente" class="new-client-overlay hidden">
         <div style="flex:1" onclick="closeNovoCliente()"></div>
@@ -389,22 +454,6 @@
             <div style="display:flex;gap:10px;margin-top:8px">
                 <button class="btn btn-gray" style="flex:1" onclick="closeNovoCliente()">Cancelar</button>
                 <button class="btn btn-cobrar" style="flex:1" onclick="salvarNovoCliente()">Salvar e Selecionar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== MODAL: CHATBOT ===================== -->
-    <div id="modal-chatbot" class="modal-overlay hidden">
-        <div class="modal-backdrop" onclick="closeChatbot()"></div>
-        <div class="modal-sheet chat-sheet" style="display:flex;flex-direction:column">
-            <div class="modal-header">
-                <span class="modal-title" style="color:var(--teal)">🤖 Inteligência Artificial de Caixa</span>
-                <button class="modal-close" onclick="closeChatbot()">✕</button>
-            </div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-row">
-                <input class="chat-input" type="text" id="chat-input" placeholder="Ex: Quanto tenho em atraso este mês?" onkeydown="if(event.key==='Enter')sendChat()">
-                <button class="chat-send" id="chat-send-btn" onclick="sendChat()">➤</button>
             </div>
         </div>
     </div>
@@ -458,52 +507,76 @@
             </div>
         </div>
     </div>
-
-    <!-- ===================== MODAL: INSIGHTS ===================== -->
-    <div id="modal-insights" class="modal-overlay hidden">
-        <div class="modal-backdrop" onclick="closeModal('modal-insights')"></div>
-        <div class="modal-sheet" style="height:75%">
-            <div class="modal-header">
-                <span class="modal-title" style="color:#d97706">📊 Insights e Diagnóstico do Caixa</span>
-                <button class="modal-close" onclick="closeModal('modal-insights')">✕</button>
-            </div>
-            <div class="modal-body" id="insights-body">
-                <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== MODAL: FILTROS ===================== -->
-    <div id="modal-filter" class="modal-overlay hidden">
-        <div class="modal-backdrop" onclick="closeModal('modal-filter')"></div>
-        <div class="modal-sheet filter-sheet">
-            <div class="modal-header">
-                <span class="modal-title">⚗️ Filtros e Seletores do Período</span>
-                <button class="modal-close" onclick="closeModal('modal-filter')">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Filtrar por Pessoa</label>
-                    <input class="form-input" type="text" placeholder="Nome ou Razão Social">
-                </div>
-                <div class="form-group">
-                    <label class="form-label" style="color:var(--blue-dark);text-transform:uppercase;letter-spacing:1px">Intervalo de Datas</label>
-                    <select class="form-select" style="margin-bottom:8px"><option>Data de Vencimento</option><option>Data de Emissão</option><option>Data de Baixa / Liquidação</option></select>
-                    <div class="grid-2">
-                        <input class="form-input" type="date" value="2026-05-01">
-                        <input class="form-input" type="date" value="2026-05-31">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-gray" style="flex:1">Limpar</button>
-                <button class="btn btn-cobrar" style="flex:2" onclick="closeModal('modal-filter')">Aplicar Filtros</button>
-            </div>
-        </div>
-    </div>
-
 </div>
+
 <script>
+
+    // Função para extrair apenas os nomes únicos da sua lista atual
+function obterNomesUnicos() {
+    // IMPORTANTE: Troque "titulos" pelo nome da variável onde você guarda os dados na tela
+    // e "nomePessoa" pela propriedade que guarda o nome do cliente.
+    const nomes = titulos.map(titulo => titulo.nomePessoa); 
+    
+    // O Set remove nomes duplicados para não aparecer "Lucas" 5 vezes na lista
+    return [...new Set(nomes)]; 
+}
+
+function mostrarSugestoes() {
+    const input = document.getElementById("inputPessoa");
+    const lista = document.getElementById("listaSugestoes");
+    const valorDigitado = input.value.toLowerCase();
+    
+    // Limpa a lista anterior
+    lista.innerHTML = "";
+
+    // Se o usuário apagou tudo, esconde a caixa de sugestões
+    if (valorDigitado.length === 0) {
+        lista.style.display = "none";
+        return;
+    }
+
+    const nomesUnicos = obterNomesUnicos();
+    
+    // Filtra os nomes que contêm o que o usuário digitou
+    const sugestoes = nomesUnicos.filter(nome => 
+        nome.toLowerCase().includes(valorDigitado)
+    );
+
+    // Se não encontrou ninguém, esconde a lista
+    if (sugestoes.length === 0) {
+        lista.style.display = "none";
+        return;
+    }
+
+    // Cria os itens da lista
+    sugestoes.forEach(nome => {
+        const divItem = document.createElement("div");
+        divItem.classList.add("sugestao-item");
+        divItem.innerText = nome;
+        
+        // Quando clicar na sugestão, preenche o input e fecha a lista
+        divItem.onclick = function() {
+            input.value = nome;
+            lista.style.display = "none";
+        };
+        
+        lista.appendChild(divItem);
+    });
+
+    // Mostra a caixa de sugestões
+    lista.style.display = "block";
+}
+
+// Opcional: Fechar a lista de sugestões se o usuário clicar fora dela
+document.addEventListener("click", function(e) {
+    const input = document.getElementById("inputPessoa");
+    const lista = document.getElementById("listaSugestoes");
+    if (e.target !== input && e.target !== lista) {
+        lista.style.display = "none";
+    }
+});
+
+
 // 🎯 FUNÇÃO QUE DESLIGA O LOADER — definida primeiro, com correção do blur
 function desligarLoader() {
     const loader = document.getElementById('loader-overlay');
@@ -521,18 +594,9 @@ function desligarLoader() {
     }
 }
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║         GESTÃO DE CAIXA — SINTEC ERP — KALIPSO STUDIO 6           ║
-// ║   Integração HTML com banco de dados via Bridge JavaScript         ║
+// ║         GESTÃO DE CAIXA — SINTEC ERP — KALIPSO STUDIO 6              ║
+// ║   Integração HTML com banco de dados via Bridge JavaScript           ║
 // ╚══════════════════════════════════════════════════════════════════════╝
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// [1] CONFIGURAÇÃO — API GEMINI (INTELIGÊNCIA ARTIFICIAL)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Habilita: Cobrança IA, Renegociação, Chatbot, Insights, Categorização
-// Obtenha sua chave em: https://aistudio.google.com/apikey
-// Deixe vazio "" para usar a tela sem IA (dados ainda funcionam normalmente)
-const GEMINI_API_KEY = "";
-// ↑ Exemplo: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -640,17 +704,33 @@ function setTab(tab, el) {
 function getBadge(item) {
     if (item.tipo === 'despesa') return `<span class="badge badge-red">↓ Saída</span>`;
     const st = String(item.status || '').toLowerCase();
-    if (st === 'baixado' || st === 'pago') return `<span class="badge badge-green">✔ Pago</span>`;
+    if (st === 'baixado' || st === 'pago') return `<span class="badge badge-green">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-clipboard-check" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
+  <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/>
+  <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/>
+</svg>
+        
+        Recebido</span>`;
     if (st === 'atrasado') return `<span class="badge badge-orange">⚠ Atrasado</span>`;
-    return `<span class="badge badge-blue">🕐 A Vencer</span>`;
+    return `<span class="badge badge-blue">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16">
+  <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
+  <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+  <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+</svg>
+
+        A Vencer</span>`;
 }
+
+
 
 function renderList() {
     const query = document.getElementById('search-input').value.toLowerCase();
-    
-    // 🛡️ 1. O ESCUDO PROTETOR (Resolve os R$ NaN e Datas vazias)
+
     const titulosSeguros = titulos.map(t => {
-        // Limpa R$, troca vírgula por ponto e força virar um número real
         const getNum = (val) => {
             if (typeof val === 'number') return val;
             if (!val) return 0;
@@ -658,39 +738,40 @@ function renderList() {
             if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
             return parseFloat(s) || 0;
         };
-
         return {
             ...t,
             id: t.id || t.ID || Math.random(),
-            // Pega o nome do cliente não importa a coluna (cliente, CLIENTE, nome, NOME)
-            cliente: t.cliente || t.CLIENTE || t.nome || t.NOME || 'Cliente não informado',
-            produto: t.produto || t.PRODUTO || t.descricao || '',
-            documento: t.documento || t.DOCUMENTO || t.doc || 'S/N',
-            parcela: t.parcela || t.PARCELA || '',
-            tipo: String(t.tipo || t.TIPO || 'receita').toLowerCase(),
-            status: t.status || t.STATUS || 'Pendente',
-            vencimento: t.vencimento || t.VENCIMENTO || t.data || t.DATA_VENCIMENTO || '',
-            dataBaixa: t.dataBaixa || t.DATA_BAIXA || t.pagamento || '',
-            valorOriginal: getNum(t.valorOriginal || t.VALOR_ORIGINAL || t.valor || t.VALOR),
-            saldoPendente: getNum(t.saldoPendente || t.SALDO_PENDENTE || t.saldo || t.valorOriginal || t.valor || t.VALOR),
-            juros: getNum(t.juros || t.JUROS),
-            multa: getNum(t.multa || t.MULTA),
-            telefone: t.telefone || t.TELEFONE || ''
+            cliente: t.cliente || 'Cliente não informado',
+            produto: t.categoria || t.produto || '',
+            documento: t.documento || 'S/N',
+            parcela: t.parcela || '',
+            nf: t.nf || '',
+            serie: t.serie || '',
+            observacao: t.observacao || '',
+            emissao: t.emissao || '',
+            tipo: String(t.tipo || 'receita').toLowerCase(),
+            status: t.status || 'Pendente',
+            vencimento: t.data || t.vencimento || '',
+            dataBaixa: t.dataBaixa || '',
+            valorOriginal: getNum(t.valorOriginal),
+            saldoPendente: getNum(t.saldoPendente || t.valorOriginal),
+            juros: getNum(t.juros),
+            multa: getNum(t.multa),
+            telefone: t.telefone || ''
         };
     });
 
-    // 2. FILTRAGEM
     const filtered = titulosSeguros.filter(item => {
-        const match = item.cliente.toLowerCase().includes(query) || item.documento.toLowerCase().includes(query) || item.produto.toLowerCase().includes(query);
+        const match = String(item.cliente).toLowerCase().includes(query) ||
+                      String(item.documento).toLowerCase().includes(query) ||
+                      String(item.produto).toLowerCase().includes(query);
         if (!match) return false;
-        
-        const st = item.status.toLowerCase();
+        const st = String(item.status).toLowerCase();
         if (activeTab === 'Despesas') return item.tipo === 'despesa';
         if (item.tipo === 'despesa') return false;
-        
-        if (activeTab === 'Abertos') return st === 'aberto' || st === 'pendente';
-        if (activeTab === 'Atrasados') return st === 'atrasado';
-        if (activeTab === 'Recebidos') return st === 'baixado' || st === 'pago';
+        if (activeTab === 'Abertos')    return st === 'aberto' || st === 'pendente' || st === 'atrasado';
+        if (activeTab === 'Atrasados')  return st === 'atrasado';
+        if (activeTab === 'Recebidos')  return st === 'baixado' || st === 'pago';
         return true;
     });
 
@@ -700,64 +781,124 @@ function renderList() {
         return;
     }
 
-    // 3. MONTAGEM DOS CARTÕES NA TELA
     area.innerHTML = filtered.map(item => {
         const isDesp = item.tipo === 'despesa';
-        const isExp = expandedId === item.id;
-        const st = item.status.toLowerCase();
+        const isExp  = expandedId === item.id;
+        const st     = String(item.status).toLowerCase();
         const isPago = (st === 'baixado' || st === 'pago');
-        
-        // Regra de Valor: Se está pago ou é despesa = Original. Se está aberto = Pendente.
-        const val = (isPago || isDesp) ? item.valorOriginal : item.saldoPendente;
+        const val      = (isPago || isDesp) ? item.valorOriginal : item.saldoPendente;
         const valClass = isDesp ? 'red' : (isPago ? 'green' : '');
-
-        // Regra de Data: Se está pago e tem data de baixa = Data Baixa. Senão = Vencimento.
         const dataExibicao = (isPago && item.dataBaixa) ? item.dataBaixa : item.vencimento;
-        const textoData = isPago ? 'Pago em' : (st === 'atrasado' ? 'Venceu em' : 'Vence em');
+        const textoData    = isPago ? 'Pago em' : (st === 'atrasado' ? 'Venceu em' : 'Vence em');
 
-        // Exibição da Parcela
-        const infoParcela = item.parcela ? `<span style="font-size: 11px; color: var(--blue-mid); font-weight: 800; margin-left: 6px;">(Parc. ${item.parcela})</span>` : '';
+        // Tags fixas abaixo do nome
+        const tagDocumento = (item.documento && item.documento !== 'S/N')
+            ? `<span style="font-size:10px; color:var(--blue-dark); background:#e0f2fe; padding:2px 7px; border-radius:5px; border:1px solid #bae6fd; font-weight:700;">Titulo ${item.documento}</span>`
+            : '';
+        const tagParcela = item.parcela
+            ? `<span style="font-size:10px; color:var(--blue-mid); background:#f3f4f6; padding:2px 7px; border-radius:5px; font-weight:700;">Parc. ${item.parcela}</span>`
+            : '';
+        const linhaTituloParcela = (tagDocumento || tagParcela)
+            ? `<div style="display:flex; align-items:center; gap:6px; margin-top:4px;">${tagDocumento}${tagParcela}</div>`
+            : '';
 
-        // Exibição de Multa/Juros (Só aparece se o valor for maior que zero!)
         const totalJurosMulta = item.juros + item.multa;
-        const jurosBadge = (totalJurosMulta > 0 && !isDesp) ? `<div style="font-size: 11px; color: var(--red); font-weight: 700; margin-top: 4px; display: inline-flex; background: #fef2f2; padding: 2px 8px; border-radius: 6px; border: 1px solid #fecaca;">+ ${fmtCurrency(totalJurosMulta)} de encargos</div>` : '';
+        const jurosBadge = (totalJurosMulta > 0 && !isDesp)
+            ? `<div style="font-size:10px; color:var(--red); font-weight:700; margin-top:6px; display:inline-flex; align-items:center; gap:4px; background:#fef2f2; padding:3px 8px; border-radius:6px; border:1px solid #fecaca;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
+                  <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                </svg>
+                + ${fmtCurrency(totalJurosMulta)} em juros</div>`
+            : '';
 
         let expanded = '';
         if (isExp) {
             let actionBtns = '';
             if (!isDesp) {
-                const baixaBtn = !isPago ? `<div class="btn-row"><button class="btn btn-baixa" onclick="marcarBaixado(${item.id})">✔ Dar Baixa</button><button class="btn btn-cobrar" onclick="openCobrancaModal(${item.id})">✨ Cobrança IA</button></div>` : '';
-                const objecBtn = !isPago ? `<button class="btn btn-teal" onclick="openObjecModal(${item.id})">💬 Simular Objeções de Cliente ✨</button>` : '';
-                const renegBtn = st === 'atrasado' ? `<button class="btn btn-purple" onclick="openRenegModal(${item.id})">🤝 Gerar Proposta de Acordo IA ✨</button>` : '';
+                const baixaBtn = !isPago
+                    ? `<div class="btn-row">
+                           <button class="btn btn-baixa" onclick="marcarBaixado(${item.id})">✔ Dar Baixa</button>
+                           <button class="btn btn-cobrar" onclick="openCobrancaModal(${item.id})">✨ Cobrança IA</button>
+                       </div>`
+                    : '';
+                const objecBtn = !isPago
+                    ? `<button class="btn btn-teal" onclick="openObjecModal(${item.id})">💬 Simular Objeções de Cliente ✨</button>`
+                    : '';
+                const renegBtn = st === 'atrasado'
+                    ? `<button class="btn btn-purple" onclick="openRenegModal(${item.id})">🤝 Gerar Proposta de Acordo IA ✨</button>`
+                    : '';
                 const waBtn = `<button class="btn btn-gray" onclick="window.open('https://wa.me/${item.telefone || ''}?text=${encodeURIComponent('Olá! Entramos em contato para verificar pendências em aberto.')}','_blank')">📱 WhatsApp Padrão</button>`;
-                actionBtns = `<div class="action-btns">${baixaBtn}${objecBtn}${renegBtn}${waBtn}</div>`;
+                actionBtns = `<div class="action-btns" style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">${baixaBtn}${objecBtn}${renegBtn}${waBtn}</div>`;
             }
+
+            const infoNF = (item.nf && item.nf !== 'null')
+                ? `<div><div class="card-grid-label">Nota Fiscal</div><div class="card-grid-val">${item.nf} <span style="color:#9ca3af; font-size:10px; font-weight:500;">(Série: ${item.serie || '-'})</span></div></div>`
+                : '';
+            const infoEmissao = (item.emissao && item.emissao !== 'null')
+                ? `<div><div class="card-grid-label">Emissão</div><div class="card-grid-val">${fmtDate(item.emissao)}</div></div>`
+                : '';
+            const infoEncargos = (!isDesp && totalJurosMulta > 0)
+                ? `<div><div class="card-grid-label" style="color:var(--red);">Multa/Juros</div><div class="card-grid-val red">+ ${fmtCurrency(totalJurosMulta)}</div></div>`
+                : '';
+            const infoObs = (item.observacao && item.observacao !== 'null' && item.observacao.trim() !== '')
+                ? `<div style="grid-column: span 2; margin-top:8px; background:#f3f4f6; padding:12px; border-radius:8px; border-left:3px solid var(--blue-mid);">
+                       <div class="card-grid-label" style="margin-bottom:4px;">Observações</div>
+                       <div class="card-grid-val" style="font-size:12px; font-weight:500; color:#374151; line-height:1.5;">${item.observacao}</div>
+                   </div>`
+                : '';
+
             expanded = `
-            <div class="card-expanded">
-                <div class="card-grid">
-                    <div><div class="card-grid-label">Documento</div><div class="card-grid-val">${item.documento}</div></div>
+            <div class="card-expanded" style="border-top:1px solid #f3f4f6; margin-top:12px; padding-top:16px;">
+                <div class="card-grid" style="grid-template-columns: 1fr 1fr; gap:12px 16px;">
+                    <div><div class="card-grid-label">Título / Doc.</div><div class="card-grid-val" style="color:var(--blue-dark); font-weight:700;">${item.documento}</div></div>
                     <div><div class="card-grid-label">Valor Original</div><div class="card-grid-val">${fmtCurrency(item.valorOriginal)}</div></div>
-                    ${(!isDesp && totalJurosMulta > 0) ? `<div><div class="card-grid-label">Multas e Juros (Incluso)</div><div class="card-grid-val red">${fmtCurrency(totalJurosMulta)}</div></div>` : ''}
+                    ${infoNF}
+                    ${infoEmissao}
+                    ${infoEncargos}
+                    ${infoObs}
                 </div>
                 ${actionBtns}
             </div>`;
         }
 
-        return `<div class="card${isDesp ? ' despesa' : ''}" id="card-${item.id}">
-            <div class="card-top" onclick="toggleExpand(${item.id})">
-                <div style="flex:1;padding-right:12px">
-                    <div class="card-name${isDesp ? ' despesa' : ''}">${item.cliente} ${infoParcela}</div>
-                    ${item.produto ? `<div class="card-produto${isDesp ? ' despesa' : ''}">🏷 ${item.produto}</div>` : ''}
-                    <div class="card-date">📅 ${textoData} ${fmtDate(dataExibicao)}</div>
+        // Card principal – setinha ao lado do badge
+        return `<div class="card${isDesp ? ' despesa' : ''}" id="card-${item.id}" style="padding-bottom:${isExp ? '16px' : '12px'};">
+            <div class="card-top" onclick="toggleExpand(${item.id})" style="cursor:pointer; align-items:center;">
+                <div style="flex:1; padding-right:12px; min-width:0;">
+                    <div class="card-name${isDesp ? ' despesa' : ''}" style="word-break:break-word; margin-bottom:2px;">
+                        ${item.cliente}
+                    </div>
+                    ${linhaTituloParcela}
+                    ${item.produto ? `<div class="card-produto${isDesp ? ' despesa' : ''}" style="margin-top:4px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M11 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8m5-4a5 5 0 1 1-10 0 5 5 0 0 1 10 0"/>
+                          <path d="M9.438 11.944c.047.596.518 1.06 1.363 1.116v.44h.375v-.443c.875-.061 1.386-.529 1.386-1.207 0-.618-.39-.936-1.09-1.1l-.296-.07v-1.2c.376.043.614.248.671.532h.658c-.047-.575-.54-1.024-1.329-1.073V8.5h-.375v.45c-.747.073-1.255.522-1.255 1.158 0 .562.378.92 1.007 1.066l.248.061v1.272c-.384-.058-.639-.27-.696-.563h-.668zm1.36-1.354c-.369-.085-.569-.26-.569-.522 0-.294.216-.514.572-.578v1.1zm.432.746c.449.104.655.272.655.569 0 .339-.257.571-.709.614v-1.195z"/>
+                          <path d="M1 0a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h4.083q.088-.517.258-1H3a2 2 0 0 0-2-2V3a2 2 0 0 0 2-2h10a2 2 0 0 0 2 2v3.528c.38.34.717.728 1 1.154V1a1 1 0 0 0-1-1z"/>
+                          <path d="M9.998 5.083 10 5a2 2 0 1 0-3.132 1.65 6 6 0 0 1 3.13-1.567"/>
+                        </svg>
+                        ${item.produto}
+                    </div>` : ''}
+                    <div class="card-date" style="margin-top:4px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M6.445 11.688V6.354h-.633A13 13 0 0 0 4.5 7.16v.695c.375-.257.969-.62 1.258-.777h.012v4.61zm1.188-1.305c.047.64.594 1.406 1.703 1.406 1.258 0 2-1.066 2-2.871 0-1.934-.781-2.668-1.953-2.668-.926 0-1.797.672-1.797 1.809 0 1.16.824 1.77 1.676 1.77.746 0 1.23-.376 1.383-.79h.027c-.004 1.316-.461 2.164-1.305 2.164-.664 0-1.008-.45-1.05-.82zm2.953-2.317c0 .696-.559 1.18-1.184 1.18-.601 0-1.144-.383-1.144-1.2 0-.823.582-1.21 1.168-1.21.633 0 1.16.398 1.16 1.23"/>
+                          <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                        </svg>
+                        ${textoData} ${fmtDate(dataExibicao)}
+                    </div>
                     ${jurosBadge}
                 </div>
-                <div class="card-right">
-                    <span class="card-value ${valClass}">${isDesp ? '-' : ''}${fmtCurrency(val)}</span>
-                    ${getBadge(item)}
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="card-right">
+                        <span class="card-value ${valClass}">${isDesp ? '-' : ''}${fmtCurrency(val)}</span>
+                        ${getBadge(item)}
+                    </div>
+                    <div onclick="event.stopPropagation(); toggleExpand(${item.id});" style="cursor:pointer; color:#9ca3af; font-size:12px; font-weight:bold; transition: transform 0.2s ease; transform: ${isExp ? 'rotate(180deg)' : 'rotate(0deg)'};">
+                        ▼
+                    </div>
                 </div>
             </div>
             ${expanded}
-            <button class="chevron-btn" onclick="toggleExpand(${item.id})">${isExp ? '▲' : '▼'}</button>
         </div>`;
     }).join('');
 }
@@ -1112,57 +1253,6 @@ async function openObjecModal(id) {
     } catch(e) { body.innerHTML = `<div style="color:#ef4444;font-size:12px;padding:16px">Configure a API Key do Gemini para usar IA.</div>`; }
 }
 
-// ==================== INSIGHTS ====================
-async function openInsights() {
-    document.getElementById('modal-insights').classList.remove('hidden');
-    const body = document.getElementById('insights-body');
-    body.innerHTML = `<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
-    try {
-        const p = `Faça um diagnóstico rápido de saúde financeira com base nestes dados: ${JSON.stringify(titulos.map(t => ({ cliente: t.cliente, valor: t.valorOriginal, status: t.status, tipo: t.tipo })))}. Forneça 4 insights acionáveis com marcadores.`;
-        const res = await callGemini({ contents: [{ parts: [{ text: p }] }] });
-        const text = res.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        body.innerHTML = `<div class="insights-text">${text}</div>`;
-    } catch(e) { body.innerHTML = `<div style="color:#ef4444;font-size:12px;padding:16px">Configure a API Key do Gemini para usar IA.</div>`; }
-}
-
-// ==================== CHATBOT ====================
-function openChatbot() {
-    document.getElementById('modal-chatbot').classList.remove('hidden');
-    renderChatMessages();
-}
-function closeChatbot() { document.getElementById('modal-chatbot').classList.add('hidden'); }
-
-function renderChatMessages() {
-    const area = document.getElementById('chat-messages');
-    area.innerHTML = chatHistory.map(m => `
-        <div class="chat-bubble-wrap ${m.role}">
-            <div class="chat-bubble ${m.role}">${m.text}</div>
-        </div>`).join('');
-    area.scrollTop = area.scrollHeight;
-}
-
-async function sendChat() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text) return;
-    chatHistory.push({ role: 'user', text });
-    input.value = '';
-    renderChatMessages();
-    const btn = document.getElementById('chat-send-btn');
-    btn.disabled = true;
-    try {
-        const sys = `Você é o assistente virtual financeiro do ERP SintecPriori. Dados atuais: ${JSON.stringify(titulos)}. Responda de forma objetiva, curta e use emojis. Foque em respostas rápidas para lojistas.`;
-        const prompt = chatHistory.map(h => `${h.role === 'user' ? 'Lojista' : 'Assistente'}: ${h.text}`).join('\n') + '\nAssistente:';
-        const res = await callGemini({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: sys }] } });
-        const reply = res.candidates?.[0]?.content?.parts?.[0]?.text || 'Não consegui processar.';
-        chatHistory.push({ role: 'assistant', text: reply });
-    } catch(e) {
-        chatHistory.push({ role: 'assistant', text: 'Configure a API Key do Gemini para usar o assistente de IA.' });
-    }
-    btn.disabled = false;
-    renderChatMessages();
-}
-
 // ==================== UTILS MODALS ====================
 function openFilterModal() { document.getElementById('modal-filter').classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -1469,6 +1559,80 @@ setTimeout(() => {
         desligarLoader();
     }
 }, 15000);
+
+// ==========================================
+// SISTEMA DE AUTOCOMPLETAR PESSOAS
+// ==========================================
+
+// Extrai nomes únicos baseados na chave correta do seu array ('cliente')
+function obterNomesUnicos() {
+    // Mapeia usando a propriedade correta do seu objeto (titulo.cliente)
+    const nomes = titulos.map(titulo => titulo.cliente); 
+    
+    // Filtra nomes vazios/indefinidos e remove as duplicações
+    const nomesValidos = nomes.filter(nome => nome && nome.trim() !== "");
+    return [...new Set(nomesValidos)]; 
+}
+
+function mostrarSugestoes() {
+    const input = document.getElementById("inputPessoa");
+    const lista = document.getElementById("listaSugestoes");
+    
+    if (!input || !lista) return; // Trava de segurança
+    
+    const valorDigitado = input.value.toLowerCase();
+    
+    // Limpa a lista anterior
+    lista.innerHTML = "";
+
+    // Se apagou tudo, esconde
+    if (valorDigitado.length === 0) {
+        lista.style.display = "none";
+        return;
+    }
+
+    const nomesUnicos = obterNomesUnicos();
+    
+    // Filtra para encontrar quem bate com a digitação
+    const sugestoes = nomesUnicos.filter(nome => 
+        nome.toLowerCase().includes(valorDigitado)
+    );
+
+    // Se não tem resultados, esconde a caixa
+    if (sugestoes.length === 0) {
+        lista.style.display = "none";
+        return;
+    }
+
+    // Cria as divs para cada cliente encontrado
+    sugestoes.forEach(nome => {
+        const divItem = document.createElement("div");
+        divItem.classList.add("sugestao-item");
+        divItem.innerText = nome;
+        
+        // Clicar no nome joga ele pro input e fecha a caixa
+        divItem.onclick = function() {
+            input.value = nome;
+            lista.style.display = "none";
+        };
+        
+        lista.appendChild(divItem);
+    });
+
+    // Exibe a caixinha
+    lista.style.display = "block";
+}
+
+// Clicar fora da caixa fecha as sugestões
+document.addEventListener("click", function(e) {
+    const input = document.getElementById("inputPessoa");
+    const lista = document.getElementById("listaSugestoes");
+    if (input && lista) {
+        if (e.target !== input && e.target !== lista) {
+            lista.style.display = "none";
+        }
+    }
+});
 
 </script>
 </body>
